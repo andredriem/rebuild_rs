@@ -37,10 +37,15 @@ bower_components
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
+backend/build/Release
+frontend/build/Release
 
 # Dependency directories
 node_modules/
 jspm_packages/
+# add frontend and backend node_modules
+frontend/node_modules/
+backend/node_modules/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/

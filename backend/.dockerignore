@@ -1,0 +1,28 @@
+# Dependency directories
+node_modules
+npm-debug.log
+
+# Build output
+build
+
+# Git directory
+.git
+
+# Various IDE config files
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Public folder if not used in production directly
+/public
