@@ -12,6 +12,13 @@ code {
     monospace;
 }
 
+.icon-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* adds space between icons */
+    padding: 10px 0;
+}
+
 .example-map p,
 .jumbotron p {
     margin: 0;
