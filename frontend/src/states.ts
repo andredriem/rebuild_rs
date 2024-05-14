@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 
 type PostIdsState = {
-    postId: number | null;
-    setPostId: (postId: number) => void;
+    postId: string | null;
+    setPostId: (postId: string) => void;
 };
 
 export const usePostId = create<PostIdsState>((set) => ({
@@ -36,4 +36,24 @@ type PinMarkerRequestState = {
 export const usePinMarkerRequest = create<PinMarkerRequestState>((set) => ({
     pinMarkerRequest: null,
     setPinMarkerRequest: (pinMarkerRequest) => set({ pinMarkerRequest }),
+}));
+
+type UserState = {
+    user: string | null;
+    setUser: (user: string) => void;
+};
+
+export const useUser = create<UserState>((set) => ({
+    user: 'test-user',
+    setUser: (user) => set({ user }),
+}));
+
+type MapRefreshCountState = {
+    refreshCount: number;
+    setRefreshCount: (count: number) => void;
+}
+
+export const useMapRefreshCount = create<MapRefreshCountState>((set) => ({
+    refreshCount: 0,
+    setRefreshCount: (count) => set({ refreshCount: count }),
 }));

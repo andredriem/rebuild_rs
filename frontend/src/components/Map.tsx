@@ -5,31 +5,30 @@ import 'ol/ol.css';
 import { RMap, ROSM, RLayerVector, RPopup, RFeature, RFeatureUIEvent } from 'rlayers';
 import { Icon, Style } from 'ol/style';
 import { mapIcons } from '../mapIcons';
-import { Modal } from 'react-bootstrap';
 import { toLonLat } from 'ol/proj';
 import GeoJSON from "ol/format/GeoJSON";
 import { usePinMarkerRequest, usePostId, useSelectedTool } from '../states';
 import ToolbarComponent from './Tooolbar';
-import { Feature, MapBrowserEvent } from 'ol';
-import { Geometry } from 'ol/geom';
+import { MapBrowserEvent } from 'ol';
 import { NewPinModal } from './NewPinModal';
 import { v4 as uuidv4 } from 'uuid';
+import { useMapRefreshCount } from '../states';
 
 /** Main map */
 export function Map(): ReactElement {
-    const [show, setShow] = React.useState(false);
-    const [latitude, setLatitude] = React.useState(-30.0274557);
-    const { setPostId } = usePostId();
-    const [longitude, setLongitude] = React.useState(-51.2345937);
-    const [zoom, setZoom] = React.useState(14);
-    const [modalTitle, setModalTitle] = React.useState('')
+    const [latitude] = React.useState(-30.0274557);
+    const { setPostId, postId } = usePostId();
+    const [longitude] = React.useState(-51.2345937);
+    const [zoom] = React.useState(14);
     const popup = React.useRef<RPopup>()
     const vectorLayerRef = React.useRef<RLayerVector>();
     const { selectedTool } = useSelectedTool();
     const { pinMarkerRequest, setPinMarkerRequest } = usePinMarkerRequest();
+    const { refreshCount } = useMapRefreshCount();
+
     useEffect(() => {
-        //void fetchMapData();
-    }, [latitude, longitude, zoom]);
+        
+    }, [postId, refreshCount]);
 
     if (vectorLayerRef === undefined) return <div></div>
     if (popup === undefined) return <div></div>
@@ -43,16 +42,16 @@ export function Map(): ReactElement {
         const coordinates = e.map.getCoordinateFromPixel(e.pixel);
         console.log(coordinates);
 
+        
+
 
         e.map.getView().fit(geometry.getExtent(), {
             duration: 250,
             maxZoom: 15,
         });
 
-        // Set modal title to random title
-        setModalTitle(Math.random().toString());
-        setPostId(Math.random());
-        //setShow(true);
+        const postId = feature.get('postId');
+        setPostId(postId);
     }
 
     const handlePinMarkerRequest = (e: MapBrowserEvent<UIEvent>) => {
@@ -70,7 +69,7 @@ export function Map(): ReactElement {
         <div>
             <NewPinModal/>
             <ToolbarComponent />
-            <RMap
+            <RMap 
                 className='example-map'
                 initial={{ center: fromLonLat([longitude, latitude]), zoom: zoom }}
                 onClick={(e) => {
@@ -82,20 +81,20 @@ export function Map(): ReactElement {
                 <ROSM />
 
                 <RLayerVector
-                    url={`/api/mapData?latitude=${latitude}&longitude=${longitude}&zoom=${zoom}`}
+                    url={`/api/mapData?latitude=${latitude}&longitude=${longitude}&zoom=${zoom}&refreshCount=${refreshCount}`}
                     format={new GeoJSON({ featureProjection: "EPSG:3857" })}
                     style={(feature) => {
-                        // selects random mapIcons (based on random funciton and size of mapIcons object)
+                        const icon = mapIcons[feature.get('icon')];
+                        console.log('icon', icon);
                         function getRandomKey(obj: Record<string, any>): string {
                             const keys = Object.keys(obj);
                             return keys[Math.floor(Math.random() * keys.length)];
                         }
                         const randomIcon = mapIcons[getRandomKey(mapIcons)];
-
-
+                        console.log('randomIcon', randomIcon);
                         return new Style({
                             image: new Icon({
-                                src: randomIcon,
+                                src: icon,
                                 anchor: [0.5, 0.8],
                             }),
                         });
@@ -105,6 +104,7 @@ export function Map(): ReactElement {
                             handleFeatureClick(e);
                         }
                     }}
+                    
                 >
                     <RFeature
 

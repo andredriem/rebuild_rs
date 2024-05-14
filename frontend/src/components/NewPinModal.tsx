@@ -1,8 +1,9 @@
 import { ReactElement, useState } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
-import { usePinMarkerRequest } from "../states";
+import { usePinMarkerRequest, usePostId, useSelectedTool, useUser } from "../states";
 import React from "react";
 import { mapIcons } from "../mapIcons";
+import { useMapRefreshCount } from "../states";
 
 export function NewPinModal(): ReactElement {
     const { pinMarkerRequest, setPinMarkerRequest } = usePinMarkerRequest();
@@ -10,6 +11,11 @@ export function NewPinModal(): ReactElement {
     const [body, setBody] = useState('');
     const [pinIcon, setPinIcon] = useState('');
     const [error, setError] = useState('');
+    const { setPostId } = usePostId();
+    const { setSelectedTool } = useSelectedTool();
+    const { user } = useUser();
+    const { refreshCount, setRefreshCount } = useMapRefreshCount();
+    
 
     const handleClose = () => {
         setPinMarkerRequest(null);
@@ -37,16 +43,35 @@ export function NewPinModal(): ReactElement {
             pinIcon: pinIcon,
             latitude: pinMarkerRequest.latitude,
             longitude: pinMarkerRequest.longitude,
+            user: user,
         };
 
-        await fetch('/api/postTopic', {
+        const response = await fetch('/api/postTopic', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(formData),
         });
+        
+        let responseData: any
+        try {
+            responseData = await response.json();
+        } catch (error) {
+            setError('Failed to create new pin');
+            return;
+        }
 
+        if (response.status !== 200) {
+            setError(responseData.message);
+            return;
+        }
+
+        console.log(responseData);
+        setRefreshCount(refreshCount+1);
+        setPostId(responseData.postId);
+        // Change tool to mouse
+        setSelectedTool('Mouse');
         handleClose();
     };
 
