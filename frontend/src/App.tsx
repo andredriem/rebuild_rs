@@ -14,12 +14,12 @@ function App() {
   return <>
     <Container fluid={true} style={{ height: '100vh', margin: 0, padding: 0, marginTop: '20px'}}>
       <Row>
-        <Col xs={3}>
+        <Col xs={5}>
           <div>
             <Topic />
           </div>
         </Col>
-        <Col xs={9}>
+        <Col xs={7}>
           <Map />
         </Col>
       </Row>

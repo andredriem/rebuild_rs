@@ -15,7 +15,7 @@ export function NewPinModal(): ReactElement {
     const { setSelectedTool } = useSelectedTool();
     const { user } = useUser();
     const { refreshCount, setRefreshCount } = useMapRefreshCount();
-    
+
 
     const handleClose = () => {
         setPinMarkerRequest(null);
@@ -37,23 +37,22 @@ export function NewPinModal(): ReactElement {
         }
 
         const formData = {
-            uuid: pinMarkerRequest.uuid,
             title: title,
-            body: body,
-            pinIcon: pinIcon,
+            raw: body,
+            icon: pinIcon,
             latitude: pinMarkerRequest.latitude,
             longitude: pinMarkerRequest.longitude,
-            user: user,
+            category: 4,
         };
 
-        const response = await fetch('/api/postTopic', {
+        const response = await fetch('/forum/posts.json', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(formData),
         });
-        
+
         let responseData: any
         try {
             responseData = await response.json();
@@ -62,16 +61,25 @@ export function NewPinModal(): ReactElement {
             return;
         }
 
+        if (response.status === 422) {
+            try {
+                setError(responseData.errors.join('\n') || 'An unknown error occurred.');
+            } catch (error) {
+                setError('Failed to parse error message.');
+            }
+            return
+        }
+
         if (response.status !== 200) {
             setError(responseData.message);
             return;
         }
 
         console.log(responseData);
-        setRefreshCount(refreshCount+1);
-        setPostId(responseData.postId);
+        console.log(responseData.id);
+        setRefreshCount(refreshCount + 1);
+        setPostId(responseData.topic_id.toString());
         // Change tool to mouse
-        setSelectedTool('Mouse');
         handleClose();
     };
 
@@ -129,6 +137,12 @@ export function NewPinModal(): ReactElement {
                         Save Changes
                     </Button>
                 </Modal.Footer>
+                <div className="m-3">
+
+                <Form.Text className="text-muted">
+                    Depois de criar este tópico, você pode cilcar no botão de <b>"Ver discussão no Fórum"</b> na esquerda onde vocês terá mais opções de edilção, como a inclusão de imagens e videos.
+                </Form.Text>
+                </div>
             </Form>
         </Modal>
     );

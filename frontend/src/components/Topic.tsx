@@ -1,91 +1,103 @@
 import React, { useEffect, useState } from 'react';
-import { Card, ListGroup, InputGroup, FormControl, Button } from 'react-bootstrap';
+import { Card, ListGroup, InputGroup, FormControl, Button, Alert } from 'react-bootstrap';
 import { usePostId } from '../states';
 
 function Comment({ text, isFirst }: { text: string; isFirst: boolean }) {
-    const style = isFirst ? {} : { backgroundColor: '#f8f9fa', fontStyle: 'italic' };
-    return (
-        <ListGroup.Item style={style}>
-            {text}
-        </ListGroup.Item>
-    );
+  const style = isFirst ? {} : { backgroundColor: '#f8f9fa', fontStyle: 'italic' };
+  return (
+    <ListGroup.Item style={style}>
+      {text}
+    </ListGroup.Item>
+  );
 }
 
 export function Topic() {
-    const { postId } = usePostId();
-    const [postData, setPostData] = useState<any>(null);
-    const [topicRefreshCount, setTopicRefreshCount] = useState(0);
-    const [commentText, setCommentText] = useState('');
+  const { postId } = usePostId();
+  const [postData, setPostData] = useState<any>(null);
+  const [topicRefreshCount, setTopicRefreshCount] = useState(0);
+  const [commentText, setCommentText] = useState('');
+  const [errors, setErrors] = useState<string[]>([]);
+  const [iframeWait, setIframeWait] = useState(true);
 
-    useEffect(() => {
-        (async () => {
-            if (postId === null) {
-                return;
-            }
-    
-            const res = await fetch(`/api/post/${postId}`);
-            const resJson = await res.json();
-            setPostData(resJson);
-        })();
-    }, [postId, topicRefreshCount]);
+  useEffect(() => {
+    // Creates a timeout of 1 second to wait for the iframe to load
+    // to esnure that the topic is correctly loaded
+    const timeout = setTimeout(() => {
+      setIframeWait(false);
+    }, 1000);
+    setIframeWait(true);
+    return () => clearTimeout(timeout);
+  }, [postId]);
 
-    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        e.preventDefault();
-        const payload = {
-            user: 'test-user',
-            text: commentText,
-            postId: postId
-        };
 
-        const response = await fetch(`/api/post/${postId}/comments`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload)
-        });
 
-        if (response.status !== 200) {
-            console.log(`Failed to post comment: ${response.status}`);
-        } else {
-            setCommentText('');
-            setTopicRefreshCount(prev => prev + 1);
-        }
+
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    const payload = {
+      raw: commentText,
+      topic_id: postId
     };
 
-    if (postId === null || postData === null) {
-        return <>No Post to display</>;
+    const response = await fetch(`/forum/posts.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.status === 422) {
+      try {
+        const errorData = await response.json();
+        setErrors(errorData.errors || ['An unknown error occurred.']);
+      } catch (error) {
+        setErrors(['Failed to parse error message.']);
+      }
+    } else if (response.ok) {
+      setCommentText('');
+      setErrors([]); // Clear errors on successful post
+      setTopicRefreshCount(prev => prev + 1);
+    } else {
+      console.log(`Failed to post comment: ${response.status}`);
     }
 
-    const comments = postData['messages'];
-    const firstComment = comments[0];
-    if (firstComment === undefined) {
-        return <>No Post to display</>;
-    }
-    const restOfComments = comments.slice(1);
 
-    return (
-        <Card style={{ height: '90vh' }}>
-            <Card.Header>{postData.post.title}</Card.Header>
-            <ListGroup variant="flush" style={{overflowY: 'auto', maxHeight: '80vh'}}>
-                <Comment text={firstComment.text} isFirst={true} />
-                {restOfComments.map((comment: any, index: number) => (
-                    <Comment key={index} text={comment.text} isFirst={false} />
-                ))}
-            </ListGroup>
-            <Card.Footer>
-                <InputGroup>
-                    <FormControl
-                        placeholder="Add a comment..."
-                        aria-label="Add a comment"
-                        value={commentText}
-                        onChange={e => setCommentText(e.target.value)}
-                    />
-                    <Button variant="outline-secondary" id="button-addon2" onClick={(e) => handleSubmit(e)}>
-                        Submit
-                    </Button>
-                </InputGroup>
-            </Card.Footer>
-        </Card>
-    );
+  };
+
+  if (postId === null) {
+    return <>No Post to display</>;
+  }
+
+
+  return (
+    <Card style={{ height: '90vh' }}>
+      {
+        (()=>{
+          if(iframeWait){
+            return <Card.Body>Loading...</Card.Body>
+          }
+          return <iframe key={topicRefreshCount} title={'aaa' + topicRefreshCount.toString()} src={`/forum/embed/comments?topic_id=${postId}`} style={{ width: '100%', border: 'none', height: '80vh' }}></iframe>
+        })()
+      }
+      <Card.Footer>
+        {errors.length > 0 && <Alert variant="danger">
+          {errors.map((error, index) => (
+            <div key={index}>{error}</div>
+          ))}
+        </Alert>}
+        <InputGroup>
+          <FormControl
+            placeholder="Add a comment..."
+            aria-label="Add a comment"
+            value={commentText}
+            onChange={e => setCommentText(e.target.value)}
+          />
+          <Button variant="outline-secondary" id="button-addon2" onClick={(e) => handleSubmit(e)}>
+            Submit
+          </Button>
+        </InputGroup>
+      </Card.Footer>
+    </Card>
+  );
 }
