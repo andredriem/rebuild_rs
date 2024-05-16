@@ -1,5 +1,32 @@
 import { create } from 'zustand'
 
+export type LoginData = {
+    username: string;
+    userId: string;
+    avatarTemplate: string | null;
+    email: string;
+} | null
+
+type LoginDataState = {
+    loginData: LoginData | null;
+    setLoginData: (loginData: LoginData) => void;
+};
+
+export const useLoginData = create<LoginDataState>((set) => ({
+    loginData: null,
+    setLoginData: (loginData) => set({ loginData }),
+}));
+
+type ShowLoginModalState = {
+    showLoginModal: boolean;
+    setShowLoginModal: (showLoginModal: boolean) => void;
+};
+
+export const useShowLoginModal = create<ShowLoginModalState>((set) => ({
+    showLoginModal: false,
+    setShowLoginModal: (showLoginModal: boolean) => set({ showLoginModal }),
+}));
+
 type PostIdsState = {
     postId: string | null;
     setPostId: (postId: string) => void;

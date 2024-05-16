@@ -1,6 +1,6 @@
 import { ReactElement, useState } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
-import { usePinMarkerRequest, usePostId, useSelectedTool, useUser } from "../states";
+import { useLoginData, usePinMarkerRequest, usePostId, useSelectedTool, useUser } from "../states";
 import React from "react";
 import { mapIcons } from "../mapIcons";
 import { useMapRefreshCount } from "../states";
@@ -15,6 +15,7 @@ export function NewPinModal(): ReactElement {
     const { setSelectedTool } = useSelectedTool();
     const { user } = useUser();
     const { refreshCount, setRefreshCount } = useMapRefreshCount();
+    const { setLoginData } = useLoginData();
 
 
     const handleClose = () => {
@@ -68,6 +69,13 @@ export function NewPinModal(): ReactElement {
                 setError('Failed to parse error message.');
             }
             return
+        }
+
+        if (response.status === 401 || response.status === 403) {
+            setLoginData(null);
+            setSelectedTool('Mouse');
+            setError('You must be logged in to create a new pin.');
+            return;
         }
 
         if (response.status !== 200) {

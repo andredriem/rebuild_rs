@@ -7,7 +7,7 @@ import { Icon, Style } from 'ol/style';
 import { mapIcons } from '../mapIcons';
 import { toLonLat } from 'ol/proj';
 import GeoJSON from "ol/format/GeoJSON";
-import { usePinMarkerRequest, usePostId, useSelectedTool } from '../states';
+import { useLoginData, usePinMarkerRequest, usePostId, useSelectedTool, useShowLoginModal } from '../states';
 import ToolbarComponent from './Tooolbar';
 import { MapBrowserEvent } from 'ol';
 import { NewPinModal } from './NewPinModal';
@@ -39,6 +39,8 @@ export function Map(): ReactElement {
     const [refreshTimoutCalled, setRefreshTimoutCalled] = React.useState(false);
     const [popupContent, setPopupContent] = React.useState<string | null>('');
     const [overlayLonLat, setOverlayLonLat] = React.useState<[number, number]>([0, 0]);
+    const { loginData } = useLoginData()
+    const { setShowLoginModal } = useShowLoginModal()
 
     useEffect(() => {
 
@@ -65,6 +67,12 @@ export function Map(): ReactElement {
     }
 
     const handlePinMarkerRequest = (e: MapBrowserEvent<UIEvent>) => {
+        // Check if the user is logged in
+        if (loginData === null) {
+            setShowLoginModal(true);
+            return;
+        }
+
         const coordinates = toLonLat(
             e.map.getCoordinateFromPixel(e.pixel)
         )
