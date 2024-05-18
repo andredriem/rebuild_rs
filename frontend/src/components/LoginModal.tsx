@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useLoginData, useShowLoginModal } from '../states';
+import { useLoginData, useShowLoginModal, useTriggerLoginCheckCounter } from '../states';
 import { Modal, Button, Form } from 'react-bootstrap';
+import { GoogleLogin } from '@react-oauth/google';
 
 type LoginModalProps = {
     show: boolean;
@@ -13,6 +14,8 @@ export function LoginModal() {
     const { showLoginModal, setShowLoginModal } = useShowLoginModal();
     const [localPassword, setLocalPassword] = useState<string>('');
     const [localUsername, setLocalUsername] = useState<string>('');
+    const { setTriggerLoginCheckCounter, triggerLoginCheckCounter } = useTriggerLoginCheckCounter();
+
 
     // For securityReasons we will force the reset of localPassword and localUsername
     // everytime the showLoginModal changes
@@ -88,12 +91,21 @@ export function LoginModal() {
 
     return (
         <Modal show={showLoginModal} onHide={closeModal}>
-                <Form onSubmit={(e) => {e.preventDefault(); handleLogin(localUsername, localPassword)}}>
+            <Form onSubmit={(e) => { e.preventDefault(); handleLogin(localUsername, localPassword) }}>
 
-            <Modal.Header closeButton>
-                <Modal.Title>Login</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
+                <Modal.Header closeButton>
+                    <Modal.Title>Login</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <GoogleLogin
+                        onSuccess={credentialResponse => {
+                            setTriggerLoginCheckCounter(triggerLoginCheckCounter + 1);
+                            closeModal();
+                        }}
+                        onError={() => {
+                            setLoginError('Failed to login with Google')
+                        }}
+                    />
                     <Form.Group>
                         <Form.Label>Username</Form.Label>
                         <Form.Control
@@ -113,15 +125,15 @@ export function LoginModal() {
                     {loginError && <div className="alert alert-danger" role="alert">
                         {loginError}
                     </div>}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={closeModal}>
-                    Close
-                </Button>
-                <Button variant="primary" disabled={isRequestingLogin} type="submit">
-                    {isRequestingLogin ? 'Logging in...' : 'Login'}
-                </Button>
-            </Modal.Footer>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={closeModal}>
+                        Close
+                    </Button>
+                    <Button variant="primary" disabled={isRequestingLogin} type="submit">
+                        {isRequestingLogin ? 'Logging in...' : 'Login'}
+                    </Button>
+                </Modal.Footer>
             </Form>
 
         </Modal>

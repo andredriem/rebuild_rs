@@ -6,9 +6,10 @@ import { Button, Col, Container, Row, Tooltip } from 'react-bootstrap';
 import { Map } from './components/Map';
 import { Topic } from './components/Topic';
 import { LoginModal } from './components/LoginModal';
-import { LoginData, useLoginData, useShowLoginModal } from './states';
+import { LoginData, useLoginData, useShowLoginModal, useTriggerLoginCheckCounter } from './states';
 import { LoginLoggoutButton } from './components/LoginLogoutButton';
 import NavBar from './components/NavBar';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 function App() {
   // The app is set at at maximum height (100vh),
@@ -19,6 +20,8 @@ function App() {
   const { loginData, setLoginData } = useLoginData();
   const { setShowLoginModal } = useShowLoginModal();
   const [loginCheck, setLoginCheck] = React.useState(false);
+  const { triggerLoginCheckCounter } = useTriggerLoginCheckCounter();
+
   useEffect(() => {
     const checkLogin = async () => {
       const response = await fetch('/forum/session/current.json');
@@ -49,13 +52,14 @@ function App() {
       setLoginCheck(true);
     }
     checkLogin();
-  }, [loginCheck, setLoginData]);
+  }, [loginCheck, setLoginData, triggerLoginCheckCounter]);
 
   if (!loginCheck) {
     return <div>Loading...</div>
   }
 
   return <>
+  <GoogleOAuthProvider clientId="48754322053-fh5rdp91g8ro30tb8hg3b19oapc5mnol.apps.googleusercontent.com">
     <div style={{height: '6vh'}}>
     <NavBar />
     </div>
@@ -75,6 +79,7 @@ function App() {
       </Row>
     </Container>
     </div>
+    </GoogleOAuthProvider>;
   </>
 
 }

@@ -89,3 +89,14 @@ export const useMapRefreshCount = create<MapRefreshCountState>((set) => ({
     refreshCount: 0,
     setRefreshCount: (count) => set({ refreshCount: count }),
 }));
+
+
+type TriggerLoginCheckCounterState = {
+    triggerLoginCheckCounter: number;
+    setTriggerLoginCheckCounter: (count: number) => void;
+}
+
+export const useTriggerLoginCheckCounter = create<TriggerLoginCheckCounterState>((set) => ({
+    triggerLoginCheckCounter: 0,
+    setTriggerLoginCheckCounter: (count) => set({ triggerLoginCheckCounter: count }),
+}));
