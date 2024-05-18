@@ -84,9 +84,20 @@ export function Map(): ReactElement {
     }
 
     return (
-        <div>
+        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
             <NewPinModal />
-            <ToolbarComponent />
+            <ToolbarComponent style={
+                {
+                    position: 'absolute',
+                    top: '0%',
+                    left: '50%',
+                    transform: 'translate(-50%, 50%)',
+                    zIndex: 1000,
+                    backgroundColor: 'white',
+                    padding: '10px',
+                    boxShadow: '0 1px 5px rgba(0,0,0,0.65)'
+                  }
+            } />
             <RMap
                 className='example-map'
                 initial={{ center: fromLonLat([longitude, latitude]), zoom: zoom }}

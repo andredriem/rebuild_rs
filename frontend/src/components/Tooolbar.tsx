@@ -4,7 +4,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMousePointer, faMapPin } from '@fortawesome/free-solid-svg-icons';
 import { SelectedTool, useSelectedTool } from '../states';
 
-export function ToolbarComponent() {
+
+type ToolbarProps = {
+  style: React.CSSProperties;
+}
+
+export function ToolbarComponent(props: ToolbarProps) {
   const { selectedTool, setSelectedTool } = useSelectedTool();
 
   let mouseSelected = false;
@@ -26,16 +31,7 @@ export function ToolbarComponent() {
   }
 
   return (
-    <div style={{
-      position: 'absolute',
-      top: '0%',
-      left: '50%',
-      transform: 'translate(-50%, 50%)',
-      zIndex: 1000,
-      backgroundColor: 'white',
-      padding: '10px',
-      boxShadow: '0 1px 5px rgba(0,0,0,0.65)'
-    }}>
+    <div style={props.style}>
       <Button variant="light" onClick={() => handleToolClick('Mouse', mouseSelected)} active={mouseSelected}>
         <FontAwesomeIcon icon={faMousePointer} /></Button>
       <Button variant="light" onClick={() => handleToolClick('Pin', pinSelected)} active={pinSelected}>

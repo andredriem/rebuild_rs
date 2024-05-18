@@ -88,6 +88,7 @@ export function NewPinModal(): ReactElement {
         setRefreshCount(refreshCount + 1);
         setPostId(responseData.topic_id.toString());
         // Change tool to mouse
+        setSelectedTool('Mouse');
         handleClose();
     };
 
