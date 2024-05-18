@@ -56,8 +56,12 @@ function App() {
   }
 
   return <>
+    <div style={{height: '6vh'}}>
     <NavBar />
-    <Container fluid={true} style={{ height: '100vh', marginLeft: 20, padding: 0 }}>
+    </div>
+    <div style={{height: '94vh'}}>
+
+    <Container fluid={true} style={{  marginLeft: 20, padding: 0 }}>
       <LoginModal />
       <Row>
         <Col xs={5}>
@@ -73,6 +77,7 @@ function App() {
         </Col>
       </Row>
     </Container>
+    </div>
   </>
 
 }

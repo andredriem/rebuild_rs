@@ -127,7 +127,7 @@ export function Map(): ReactElement {
                     }
 
                     // Set latitude and longitude in the querystring without reloading the page
-                    window.history.pushState({}, '', `?latitude=${newCoordinates[1]}&longitude=${newCoordinates[0]}`);
+                    window.history.pushState({}, '', `?latitude=${newCoordinates[1]}&longitude=${newCoordinates[0]}&post_id=${postId}`);
 
                 }}
             >

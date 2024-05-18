@@ -32,8 +32,13 @@ type PostIdsState = {
     setPostId: (postId: string) => void;
 };
 
+let initialPostId: number | null = parseInt(new URLSearchParams(window.location.search).get('post_id') ?? '15');
+if(isNaN(initialPostId) || initialPostId <= 0) {
+  initialPostId = null;
+}
+
 export const usePostId = create<PostIdsState>((set) => ({
-    postId: null,
+    postId: initialPostId?.toString() ?? null,
     setPostId: (postId) => set({ postId }),
 }));
 

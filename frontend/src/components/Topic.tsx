@@ -105,7 +105,7 @@ export function Topic() {
   }
 
   return (
-    <Card style={{ height: '90vh' }}>
+    <Card>
       {
         (() => {
           if (iframeWait) {
