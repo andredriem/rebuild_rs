@@ -68,9 +68,6 @@ function App() {
           <Row>
             <Topic />
           </Row>
-          <Row>
-            <LoginLoggoutButton />
-          </Row>
         </Col>
         <Col xs={7}>
           <Map />

@@ -77,6 +77,7 @@ export function Topic() {
   let footer: ReactElement | null = null
   if (loginData !== null) {
     footer = <>
+    <div style={{height: '15vh'}}>
       {errors.length > 0 && <Alert variant="danger">
         {errors.map((error, index) => (
           <div key={index}>{error}</div>
@@ -95,6 +96,7 @@ export function Topic() {
           Submit
         </Button>
       </InputGroup>
+      </div>
     </>
   } else {
     // Message saying that the user is not logged in
@@ -111,7 +113,7 @@ export function Topic() {
           if (iframeWait) {
             return <Card.Body>Loading...</Card.Body>
           }
-          return <iframe key={topicRefreshCount} title={'aaa' + topicRefreshCount.toString()} src={`/forum/embed/comments?topic_id=${postId}`} style={{ width: '100%', border: 'none', height: '80vh' }}></iframe>
+          return <iframe key={topicRefreshCount} title={'aaa' + topicRefreshCount.toString()} src={`/forum/embed/comments?topic_id=${postId}`} style={{ width: '100%', border: 'none', height: '75vh' }}></iframe>
         })()
       }
       <Card.Footer>
