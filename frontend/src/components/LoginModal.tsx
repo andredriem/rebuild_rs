@@ -34,12 +34,24 @@ export function LoginModal() {
 
         let csrf = jsonData.csrf;
 
+        // Prepare the content of the request
+        function encodeFormData(data: any) {
+            return Object.keys(data)
+                .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
+                .join('&');
+        }
+        
+        const data = {
+            authenticity_token: csrf,
+        };
+        
+        
         // Prevent following redirects
         const redirectResponse = await fetch("/forum/auth/google_oauth2", {
-            "body": JSON.stringify({ authenticity_token: csrf }),
+            "body": encodeFormData(data),
             "method": "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
             },
             "mode": "cors",
             "redirect": "manual",
