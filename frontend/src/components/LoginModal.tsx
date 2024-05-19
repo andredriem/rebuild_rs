@@ -53,6 +53,8 @@ export function LoginModal() {
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
+            "mode": "cors",
+
         });
     }
     // For securityReasons we will force the reset of localPassword and localUsername
