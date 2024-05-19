@@ -17,8 +17,7 @@ export function LoginModal() {
     const [localUsername, setLocalUsername] = useState<string>('');
     const { setTriggerLoginCheckCounter, triggerLoginCheckCounter } = useTriggerLoginCheckCounter();
     const googleLogin = async () => {
-        const response = await fetch("forum/session/csrf", {
-        });
+        const response = await fetch("forum/session/csrf.json");
 
         let jsonData = null;
         try {
@@ -35,7 +34,6 @@ export function LoginModal() {
             "referrer": "https://reconstroirs.com/forum/latest",
             "body": JSON.stringify({ authenticity_token: csrf }),
             "method": "POST",
-            "mode": "cors"
         });
     }
     // For securityReasons we will force the reset of localPassword and localUsername
