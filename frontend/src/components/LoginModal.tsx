@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useLoginData, useShowLoginModal, useTriggerLoginCheckCounter } from '../states';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
+import { set } from 'ol/transform';
 
 type LoginModalProps = {
     show: boolean;
@@ -15,8 +16,17 @@ export function LoginModal() {
     const [localPassword, setLocalPassword] = useState<string>('');
     const [localUsername, setLocalUsername] = useState<string>('');
     const { setTriggerLoginCheckCounter, triggerLoginCheckCounter } = useTriggerLoginCheckCounter();
-
-
+    const googleLogin = useGoogleLogin({
+        flow: 'auth-code',
+        onSuccess: response => {
+            setTriggerLoginCheckCounter(triggerLoginCheckCounter + 1);
+            closeModal();
+            console.log(response.code);
+        },
+        onError: error => { console.error(error); setLoginError('Failed to login with Google')},
+        ux_mode: 'redirect',
+        redirect_uri: 'https://reconstroirs.com/forum/auth/google_oauth2/callback',
+    });
     // For securityReasons we will force the reset of localPassword and localUsername
     // everytime the showLoginModal changes
     useEffect(() => {
@@ -98,6 +108,7 @@ export function LoginModal() {
                 </Modal.Header>
                 <Modal.Body>
                     <GoogleLogin
+                        ux_mode="redirect"
                         onSuccess={credentialResponse => {
                             setTriggerLoginCheckCounter(triggerLoginCheckCounter + 1);
                             closeModal();
