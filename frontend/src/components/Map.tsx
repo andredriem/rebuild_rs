@@ -16,9 +16,9 @@ import { useMapRefreshCount } from '../states';
 import { getDistance } from 'ol/sphere';
 import { Point } from 'ol/geom';
 
-const DEFAULT_LATITUDE = -30.74395884549905;
-const DEFAULT_LONGITUDE = -50.53246175309501;
-const DEFAULT_ZOOM = 12;
+const DEFAULT_LATITUDE = -30.707657941645316;
+const DEFAULT_LONGITUDE = -50.7949242640363;
+const DEFAULT_ZOOM = 10;
 
 /** Main map */
 export function Map(): ReactElement {
