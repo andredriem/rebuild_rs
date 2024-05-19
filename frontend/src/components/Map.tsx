@@ -22,10 +22,9 @@ export function Map(): ReactElement {
     let queryLatitude = parseFloat(new URLSearchParams(window.location.search).get('latitude') ?? '-30.0274557');
     let queryLongitude = parseFloat(new URLSearchParams(window.location.search).get('longitude') ?? '-51.2345937');
     if (isNaN(queryLatitude) || isNaN(queryLongitude)) {
-        queryLatitude = -30.0274557;
-        queryLongitude = -51.2345937;
+        queryLatitude = -30.74395884549905;
+        queryLongitude = -50.53246175309501;
     }
-
 
     const [latitude, setLatitude] = React.useState(queryLatitude);
     const { setPostId, postId } = usePostId();
