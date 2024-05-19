@@ -34,16 +34,20 @@ export function LoginModal() {
 
         let csrf = jsonData.csrf;
 
-
-        await fetch("/forum/auth/google_oauth2", {
+        // Prevent following redirects
+        const redirectResponse = await fetch("/forum/auth/google_oauth2", {
             "body": JSON.stringify({ authenticity_token: csrf }),
             "method": "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            "mode": "cors"
+            "mode": "cors",
+            "redirect": "manual",
 
         });
+
+        // Manually follow the redirect
+        window.location.href = redirectResponse.headers.get('Location') ?? '';
     }
     // For securityReasons we will force the reset of localPassword and localUsername
     // everytime the showLoginModal changes
