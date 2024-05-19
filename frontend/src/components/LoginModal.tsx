@@ -16,17 +16,28 @@ export function LoginModal() {
     const [localPassword, setLocalPassword] = useState<string>('');
     const [localUsername, setLocalUsername] = useState<string>('');
     const { setTriggerLoginCheckCounter, triggerLoginCheckCounter } = useTriggerLoginCheckCounter();
-    const googleLogin = useGoogleLogin({
-        flow: 'auth-code',
-        onSuccess: response => {
-            setTriggerLoginCheckCounter(triggerLoginCheckCounter + 1);
-            closeModal();
-            console.log(response.code);
-        },
-        onError: error => { console.error(error); setLoginError('Failed to login with Google')},
-        ux_mode: 'redirect',
-        redirect_uri: 'https://reconstroirs.com/forum/auth/google_oauth2/callback',
-    });
+    const googleLogin = async () => {
+        const response = await fetch("forum/session/csrf", {
+        });
+
+        let jsonData = null;
+        try {
+            jsonData = await response.json();
+        } catch (error) {
+            console.log('Failed to parse response');
+            return;
+        }
+
+        let csrf = jsonData.csrf;
+
+
+        await fetch("https://reconstroirs.com/forum/auth/google_oauth2", {
+            "referrer": "https://reconstroirs.com/forum/latest",
+            "body": JSON.stringify({ authenticity_token: csrf }),
+            "method": "POST",
+            "mode": "cors"
+        });
+    }
     // For securityReasons we will force the reset of localPassword and localUsername
     // everytime the showLoginModal changes
     useEffect(() => {
