@@ -10,7 +10,10 @@ import { LoginData, useLoginData, useShowLoginModal, useTriggerLoginCheckCounter
 import { LoginLoggoutButton } from './components/LoginLogoutButton';
 import NavBar from './components/NavBar';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { BrowserView, MobileView, isBrowser, isMobile, isTablet } from 'react-device-detect';
 
+
+// Enable mobile const is true on development but false on production
 function App() {
   // The app is set at at maximum height (100vh),
   // there are two main components the map and the sidebar
@@ -54,32 +57,58 @@ function App() {
     checkLogin();
   }, [loginCheck, setLoginData, triggerLoginCheckCounter]);
 
+
+  
+   if (isMobile && !isTablet) {
+     return <div>O site para celular ainda está em desenvolvimento, por favor acesse pelo computador ou tablet</div>
+   }
+
   if (!loginCheck) {
     return <div>Loading...</div>
   }
 
-  return <>
-  <GoogleOAuthProvider 
-  clientId="48754322053-fh5rdp91g8ro30tb8hg3b19oapc5mnol.apps.googleusercontent.com">
-    <div style={{height: '6vh'}}>
-    <NavBar />
-    </div>
-    <div style={{height: '94vh'}}>
+  const showMobile = isMobile && !isTablet;
 
-    <Container fluid={true} style={{  marginLeft: 20, padding: 0 }}>
-      <LoginModal />
-      <Row>
-        <Col xs={5}>
-          <Row>
-            <Topic />
-          </Row>
-        </Col>
-        <Col xs={7}>
+  let multiDevice = null;
+  if (!showMobile) {
+    multiDevice = (
+      <>
+          <NavBar />
+
+          <Container fluid={true} style={{ marginLeft: 20, padding: 0 }}>
+            <LoginModal />
+            <Row>
+              <Col xs={5}>
+                <Row>
+                  <Topic />
+                </Row>
+              </Col>
+              <Col xs={7}>
+                <Map />
+              </Col>
+            </Row>
+          </Container>
+      </>
+    )
+  } else {
+    multiDevice = <>
+      <div style={{ height: '6vh', zIndex: 9999999999}}>
+        <NavBar />
+      </div>
+      <div style={{ height: '94vh' }}>
+
+        <Container fluid={true} >
+          <LoginModal />
           <Map />
-        </Col>
-      </Row>
-    </Container>
-    </div>
+        </Container>
+      </div>
+    </>
+  }
+
+  return <>
+    <GoogleOAuthProvider
+      clientId="48754322053-fh5rdp91g8ro30tb8hg3b19oapc5mnol.apps.googleusercontent.com">
+      {multiDevice}
     </GoogleOAuthProvider>;
   </>
 
