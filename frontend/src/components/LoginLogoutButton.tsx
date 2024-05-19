@@ -42,13 +42,13 @@ export function LoginLoggoutButton() {
             variant="link"
             onClick={handleLogoutRequest}
         >
-            Logout
+            Sair
         </Button>
     } else {
         loginLoggoutButton = <Button
             onClick={() => setShowLoginModal(true)}
         >
-            Login
+            Logar/Registrar
         </Button>
     }
 

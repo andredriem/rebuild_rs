@@ -20,6 +20,10 @@ const DEFAULT_LATITUDE = -30.707657941645316;
 const DEFAULT_LONGITUDE = -50.7949242640363;
 const DEFAULT_ZOOM = 10;
 
+function buildRlayerUrl(latitude: number, longitude: number, zoom: number, refreshCount: number) {
+    return `/forum/topics/maps_data.json?latitude=${latitude}&longitude=${longitude}&zoom=${zoom}&refreshCount=${refreshCount}`
+}
+
 /** Main map */
 export function Map(): ReactElement {
     // get latitude and longitude from the querystring
@@ -49,10 +53,22 @@ export function Map(): ReactElement {
     const { loginData } = useLoginData()
     const { setShowLoginModal } = useShowLoginModal()
     const { setOpenTopic } = useOpenTopic();
+    const [lastRefresh, setLastRefresh] = React.useState(Date.now());
+    const [rlayerUrl, setRlayerUrl] = React.useState(buildRlayerUrl(latitude, longitude, zoom, refreshCount));
 
     useEffect(() => {
 
     }, [postId, refreshCount]);
+
+    useEffect(() => {
+        // Only refresh if lastRefresh was 30 seconds ago
+        const now = Date.now();
+        if (now - lastRefresh > 30000) {
+            setLastRefresh(now);
+            setRlayerUrl(buildRlayerUrl(latitude, longitude, zoom, refreshCount));
+            setLastRefresh(now);
+        }
+    }, [refreshCount, latitude, longitude, zoom, lastRefresh]);
 
     if (vectorLayerRef === undefined) return <div></div>
     if (popup === undefined) return <div></div>
@@ -143,7 +159,7 @@ export function Map(): ReactElement {
                 <ROSM />
 
                 <RLayerVector
-                    url={`/forum/topics/maps_data.json?latitude=${latitude}&longitude=${longitude}&zoom=${zoom}&refreshCount=${refreshCount}`}
+                    url={rlayerUrl}
                     format={new GeoJSON({ featureProjection: "EPSG:3857" })}
                     style={(feature) => {
                         const icon = mapIcons[feature.get('icon')];

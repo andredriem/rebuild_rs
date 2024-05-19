@@ -91,14 +91,14 @@ export function Topic() {
         <InputGroup>
           <FormControl
             as="textarea"
-            placeholder="Add a comment..."
-            aria-label="Add a comment"
+            placeholder="Escrever um comentário..."
+            aria-label="Escrever um comentário..."
             value={commentText}
             onChange={e => setCommentText(e.target.value)}
             rows={commentNumberOfRows}
           />
           <Button variant="outline-secondary" id="button-addon2" onClick={(e) => handleSubmit(e)}>
-            Submit
+            Enviar
           </Button>
         </InputGroup>
       </div>

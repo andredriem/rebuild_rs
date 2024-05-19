@@ -136,8 +136,23 @@ export function LoginModal() {
                                     <Col xs="auto">
                                         <img src={googleIcon} alt="Google Icon" className="google-icon" style={{ height: '20px', marginRight: '8px' }} />
                                     </Col>
-                                    <Col>
-                                        Logar com a Google
+                                    <Col xs="auto">
+                                        Logar/Registrar com a Google
+                                    </Col>
+                                </Row>
+                            </Button>
+                        </Row>
+                        <Row className='m-2 mb-4'>
+                            <Button onClick={() => {
+                                // set url to /forum/latest
+                                window.location.href = '/forum/latest';
+                            }} variant="light" className='border border-dark'>
+                                <Row>
+                                    <Col xs="auto">
+                                        <img src={googleIcon} alt="Google Icon" className="google-icon" style={{ height: '20px', marginRight: '8px', visibility: 'hidden' }} />
+                                    </Col>
+                                    <Col xs="auto">
+                                        Criar conta no Forum
                                     </Col>
                                 </Row>
                             </Button>
@@ -145,18 +160,18 @@ export function LoginModal() {
                         <Row>
 
                             <Form.Group>
-                                <Form.Label>Username</Form.Label>
+                                <Form.Label>Usuário</Form.Label>
                                 <Form.Control
                                     type="text"
-                                    placeholder="Enter username"
+                                    placeholder="Usuário ou Email"
                                     onChange={(e) => setLocalUsername(e.target.value)}
                                 />
                             </Form.Group>
                             <Form.Group>
-                                <Form.Label>Password</Form.Label>
+                                <Form.Label>Senha</Form.Label>
                                 <Form.Control
                                     type="password"
-                                    placeholder="Password"
+                                    placeholder="Senha"
                                     onChange={(e) => setLocalPassword(e.target.value)}
                                 />
                             </Form.Group>

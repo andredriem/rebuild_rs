@@ -100,31 +100,31 @@ export function NewPinModal(): ReactElement {
         <Modal show={show} onHide={handleClose}>
             <Form onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Create New Pin</Modal.Title>
+                    <Modal.Title>Criar um novo Tópico</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {error && <Alert variant="danger">{error}</Alert>}
                     <Form.Group controlId="formTitle">
-                        <Form.Label>Title</Form.Label>
+                        <Form.Label>Título</Form.Label>
                         <Form.Control
                             type="text"
-                            placeholder="Enter title"
+                            placeholder="Escreva um título"
                             value={title}
                             onChange={e => setTitle(e.target.value)}
                         />
                     </Form.Group>
                     <Form.Group controlId="formBody">
-                        <Form.Label>Body</Form.Label>
+                        <Form.Label>Postagem</Form.Label>
                         <Form.Control
                             as="textarea"
                             rows={3}
-                            placeholder="Enter body"
+                            placeholder="Descreva o tópico"
                             value={body}
                             onChange={e => setBody(e.target.value)}
                         />
                     </Form.Group>
                     <Form.Group controlId="formPinIcon">
-                        <Form.Label>Pin Icon</Form.Label>
+                        <Form.Label>Ícone</Form.Label>
                         <div className="icon-wrapper">
                             {Object.keys(mapIcons).map((icon, index) => (
                                 <Form.Check
@@ -142,10 +142,10 @@ export function NewPinModal(): ReactElement {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
-                        Close
+                        Cancelar
                     </Button>
                     <Button variant="primary" type="submit">
-                        Save Changes
+                        Enviar
                     </Button>
                 </Modal.Footer>
                 <div className="m-3">
