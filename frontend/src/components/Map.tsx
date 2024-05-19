@@ -19,8 +19,8 @@ import { Point } from 'ol/geom';
 /** Main map */
 export function Map(): ReactElement {
     // get latitude and longitude from the querystring
-    let queryLatitude = parseFloat(new URLSearchParams(window.location.search).get('latitude') ?? '-30.0274557');
-    let queryLongitude = parseFloat(new URLSearchParams(window.location.search).get('longitude') ?? '-51.2345937');
+    let queryLatitude = parseFloat(new URLSearchParams(window.location.search).get('latitude') ?? '-30.74395884549905');
+    let queryLongitude = parseFloat(new URLSearchParams(window.location.search).get('longitude') ?? '-50.53246175309501');
     if (isNaN(queryLatitude) || isNaN(queryLongitude)) {
         queryLatitude = -30.74395884549905;
         queryLongitude = -50.53246175309501;
