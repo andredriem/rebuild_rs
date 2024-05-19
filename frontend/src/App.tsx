@@ -59,7 +59,8 @@ function App() {
   }
 
   return <>
-  <GoogleOAuthProvider clientId="48754322053-fh5rdp91g8ro30tb8hg3b19oapc5mnol.apps.googleusercontent.com">
+  <GoogleOAuthProvider 
+  clientId="48754322053-fh5rdp91g8ro30tb8hg3b19oapc5mnol.apps.googleusercontent.com">
     <div style={{height: '6vh'}}>
     <NavBar />
     </div>

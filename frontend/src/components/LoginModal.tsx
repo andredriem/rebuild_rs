@@ -16,6 +16,17 @@ export function LoginModal() {
     const [localPassword, setLocalPassword] = useState<string>('');
     const [localUsername, setLocalUsername] = useState<string>('');
     const { setTriggerLoginCheckCounter, triggerLoginCheckCounter } = useTriggerLoginCheckCounter();
+    const googleLogin = useGoogleLogin({
+        flow: 'auth-code',
+        onSuccess: response => {
+            setTriggerLoginCheckCounter(triggerLoginCheckCounter + 1);
+            closeModal();
+            console.log(response.code);
+        },
+        onError: error => { console.error(error); setLoginError('Failed to login with Google')},
+        ux_mode: 'redirect',
+        redirect_uri: 'https://reconstroirs.com/forum/auth/google_oauth2/callback',
+    });
     // For securityReasons we will force the reset of localPassword and localUsername
     // everytime the showLoginModal changes
     useEffect(() => {
@@ -96,16 +107,9 @@ export function LoginModal() {
                     <Modal.Title>Login</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <GoogleLogin
-                        ux_mode="redirect"
-                        onSuccess={credentialResponse => {
-                            setTriggerLoginCheckCounter(triggerLoginCheckCounter + 1);
-                            closeModal();
-                        }}
-                        onError={() => {
-                            setLoginError('Failed to login with Google')
-                        }}
-                    />
+                    <Button onClick={googleLogin} variant="primary">
+                        Logar com a Google
+                    </Button>
                     <Form.Group>
                         <Form.Label>Username</Form.Label>
                         <Form.Control
