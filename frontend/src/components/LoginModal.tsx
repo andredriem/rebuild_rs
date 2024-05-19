@@ -45,7 +45,7 @@ export function LoginModal() {
             "redirect": "manual",
 
         });
-
+        console.log(redirectResponse);
         const redirectUrl = redirectResponse.headers.get('Location');
         //log the redirect url
         console.log(redirectUrl);
