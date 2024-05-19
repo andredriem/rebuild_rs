@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Card, ListGroup, InputGroup, FormControl, Button, Alert } from 'react-bootstrap';
-import { useLoginData, usePostId, useShowLoginModal } from '../states';
+import { Card, ListGroup, InputGroup, FormControl, Button, Alert, Container, Row } from 'react-bootstrap';
+import { showMobile, useLoginData, useOpenTopic, usePostId, useShowLoginModal } from '../states';
 
 function Comment({ text, isFirst }: { text: string; isFirst: boolean }) {
   const style = isFirst ? {} : { backgroundColor: '#f8f9fa', fontStyle: 'italic' };
@@ -20,6 +20,12 @@ export function Topic() {
   const [iframeWait, setIframeWait] = useState(true);
   const { loginData, setLoginData } = useLoginData()
   const { setShowLoginModal } = useShowLoginModal()
+  const { setOpenTopic, openTopic } = useOpenTopic();
+
+  let commentNumberOfRows = 5;
+  if (showMobile) {
+    commentNumberOfRows = 3;
+  }
 
   useEffect(() => {
     // Creates a timeout of 1 second to wait for the iframe to load
@@ -30,7 +36,6 @@ export function Topic() {
     setIframeWait(true);
     return () => clearTimeout(timeout);
   }, [postId]);
-
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
@@ -62,7 +67,7 @@ export function Topic() {
     } else if (response.status === 401 || response.status === 403) {
       setErrors(['You must be logged in to post a comment.']);
       setLoginData(null);
-    } 
+    }
     else {
       console.log(`Failed to post comment: ${response.status}`);
     }
@@ -77,25 +82,25 @@ export function Topic() {
   let footer: ReactElement | null = null
   if (loginData !== null) {
     footer = <>
-    <div style={{height: '15vh'}}>
-      {errors.length > 0 && <Alert variant="danger">
-        {errors.map((error, index) => (
-          <div key={index}>{error}</div>
-        ))}
-      </Alert>}
-      <InputGroup>
-        <FormControl
-          as="textarea"
-          placeholder="Add a comment..."
-          aria-label="Add a comment"
-          value={commentText}
-          onChange={e => setCommentText(e.target.value)}
-          rows={5}
-        />
-        <Button variant="outline-secondary" id="button-addon2" onClick={(e) => handleSubmit(e)}>
-          Submit
-        </Button>
-      </InputGroup>
+      <div style={{ height: '15vh' }}>
+        {errors.length > 0 && <Alert variant="danger">
+          {errors.map((error, index) => (
+            <div key={index}>{error}</div>
+          ))}
+        </Alert>}
+        <InputGroup>
+          <FormControl
+            as="textarea"
+            placeholder="Add a comment..."
+            aria-label="Add a comment"
+            value={commentText}
+            onChange={e => setCommentText(e.target.value)}
+            rows={commentNumberOfRows}
+          />
+          <Button variant="outline-secondary" id="button-addon2" onClick={(e) => handleSubmit(e)}>
+            Submit
+          </Button>
+        </InputGroup>
       </div>
     </>
   } else {
@@ -106,19 +111,36 @@ export function Topic() {
     </>
   }
 
+  let closeLoginMobile;
+  if (showMobile) {
+    closeLoginMobile = (
+      <Button onClick={() => setOpenTopic(false)}>Fechar</Button>
+    )
+  }
+
+  let cardTaskName = '';
+  if (showMobile) {
+    cardTaskName = 'mt-4';
+  }
+
   return (
-    <Card>
-      {
-        (() => {
-          if (iframeWait) {
-            return <Card.Body>Loading...</Card.Body>
+    <Card className={cardTaskName}>
+      <Container>
+        <Row>{closeLoginMobile}</Row>
+        <Row>
+          {
+            (() => {
+              if (iframeWait) {
+                return <Card.Body>Loading...</Card.Body>
+              }
+              return <iframe key={topicRefreshCount} title={'aaa' + topicRefreshCount.toString()} src={`/forum/embed/comments?topic_id=${postId}`} style={{ width: '100%', border: 'none', height: '75vh' }}></iframe>
+            })()
           }
-          return <iframe key={topicRefreshCount} title={'aaa' + topicRefreshCount.toString()} src={`/forum/embed/comments?topic_id=${postId}`} style={{ width: '100%', border: 'none', height: '75vh' }}></iframe>
-        })()
-      }
-      <Card.Footer>
-        {footer}
-      </Card.Footer>
+        </Row>
+        <Card.Footer>
+          {footer}
+        </Card.Footer>
+      </Container>
     </Card>
   );
 }

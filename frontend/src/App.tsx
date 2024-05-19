@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { CSSProperties, useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -6,11 +6,10 @@ import { Button, Col, Container, Row, Tooltip } from 'react-bootstrap';
 import { Map } from './components/Map';
 import { Topic } from './components/Topic';
 import { LoginModal } from './components/LoginModal';
-import { LoginData, useLoginData, useShowLoginModal, useTriggerLoginCheckCounter } from './states';
+import { LoginData, showMobile, useLoginData, useOpenTopic, useShowLoginModal, useTriggerLoginCheckCounter } from './states';
 import { LoginLoggoutButton } from './components/LoginLogoutButton';
 import NavBar from './components/NavBar';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { BrowserView, MobileView, isBrowser, isMobile, isTablet } from 'react-device-detect';
 
 
 // Enable mobile const is true on development but false on production
@@ -24,6 +23,7 @@ function App() {
   const { setShowLoginModal } = useShowLoginModal();
   const [loginCheck, setLoginCheck] = React.useState(false);
   const { triggerLoginCheckCounter } = useTriggerLoginCheckCounter();
+  const { openTopic } = useOpenTopic();
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -58,48 +58,61 @@ function App() {
   }, [loginCheck, setLoginData, triggerLoginCheckCounter]);
 
 
-  
-   if (isMobile && !isTablet) {
-     return <div>O site para celular ainda está em desenvolvimento, por favor acesse pelo computador ou tablet</div>
-   }
+
+  /*if (isMobile && !isTablet) {
+    return <div>O site para celular ainda está em desenvolvimento, por favor acesse pelo computador ou tablet</div>
+  }*/
 
   if (!loginCheck) {
     return <div>Loading...</div>
   }
 
-  const showMobile = isMobile && !isTablet;
-
   let multiDevice = null;
   if (!showMobile) {
     multiDevice = (
       <>
-          <NavBar />
+        <NavBar />
 
-          <Container fluid={true} style={{ marginLeft: 20, padding: 0 }}>
-            <LoginModal />
-            <Row>
-              <Col xs={5}>
-                <Row>
-                  <Topic />
-                </Row>
-              </Col>
-              <Col xs={7}>
-                <Map />
-              </Col>
-            </Row>
-          </Container>
+        <Container fluid={true} style={{ marginLeft: 20, padding: 0 }}>
+          <LoginModal />
+          <Row>
+            <Col xs={5}>
+              <Row>
+                <Topic />
+              </Row>
+            </Col>
+            <Col xs={7}>
+              <Map />
+            </Col>
+          </Row>
+        </Container>
       </>
     )
   } else {
+    const topicStyle: CSSProperties = {}
+    const mapStyle: CSSProperties = {}
+    if (openTopic) {
+      topicStyle.display = undefined;
+      mapStyle.display = 'none';
+    } else {
+      topicStyle.display = 'none';
+      mapStyle.display = undefined;
+    }
+
     multiDevice = <>
-      <div style={{ height: '6vh', zIndex: 9999999999}}>
+      <div style={{ height: '6vh', zIndex: 9999999999 }}>
         <NavBar />
       </div>
       <div style={{ height: '94vh' }}>
 
         <Container fluid={true} >
           <LoginModal />
-          <Map />
+          <div style={topicStyle}>
+            <Topic />
+          </div>
+          <div style={mapStyle}>
+            <Map />
+          </div>
         </Container>
       </div>
     </>

@@ -5,7 +5,7 @@ import { LoginLoggoutButton } from './LoginLogoutButton';
 
 function NavBar() {
   return (
-    <Navbar bg="light" expand="lg">
+    <Navbar bg="light" expand="lg" style={{ zIndex: 1001 }}>
       <Navbar.Brand href="/" style={{ marginLeft: '20px' }}>
         <img
           src="/logo192.png"

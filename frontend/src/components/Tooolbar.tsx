@@ -32,8 +32,8 @@ export function ToolbarComponent(props: ToolbarProps) {
 
   return (
     <div style={props.style}>
-      <Button variant="light" onClick={() => handleToolClick('Mouse', mouseSelected)} active={mouseSelected}>
-        <FontAwesomeIcon icon={faMousePointer} /></Button>
+      {/*<Button variant="light" onClick={() => handleToolClick('Mouse', mouseSelected)} active={mouseSelected}>
+        <FontAwesomeIcon icon={faMousePointer} /></Button> */}
       <Button variant="light" onClick={() => handleToolClick('Pin', pinSelected)} active={pinSelected}>
         <FontAwesomeIcon icon={faMapPin} />Adicionar Tópico</Button>
       {/* Add more toolbar buttons as needed */}

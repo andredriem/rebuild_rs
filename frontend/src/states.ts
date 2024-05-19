@@ -1,4 +1,7 @@
 import { create } from 'zustand'
+import { BrowserView, MobileView, isBrowser, isMobile, isTablet } from 'react-device-detect';
+
+export const showMobile = isMobile && !isTablet;
 
 export type LoginData = {
     username: string;
@@ -33,8 +36,8 @@ type PostIdsState = {
 };
 
 let initialPostId: number | null = parseInt(new URLSearchParams(window.location.search).get('post_id') ?? '15');
-if(isNaN(initialPostId) || initialPostId <= 0) {
-  initialPostId = null;
+if (isNaN(initialPostId) || initialPostId <= 0) {
+    initialPostId = null;
 }
 
 export const usePostId = create<PostIdsState>((set) => ({
@@ -99,4 +102,14 @@ type TriggerLoginCheckCounterState = {
 export const useTriggerLoginCheckCounter = create<TriggerLoginCheckCounterState>((set) => ({
     triggerLoginCheckCounter: 0,
     setTriggerLoginCheckCounter: (count) => set({ triggerLoginCheckCounter: count }),
+}));
+
+type OpenTopicState = {
+    openTopic: boolean
+    setOpenTopic: (openTopic: boolean) => void;
+};
+
+export const useOpenTopic = create<OpenTopicState>((set) => ({
+    openTopic: false,
+    setOpenTopic: (openTopic) => set({ openTopic }),
 }));

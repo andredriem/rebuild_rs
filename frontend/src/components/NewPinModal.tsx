@@ -1,6 +1,6 @@
 import { ReactElement, useState } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
-import { useLoginData, usePinMarkerRequest, usePostId, useSelectedTool, useUser } from "../states";
+import { useLoginData, useOpenTopic, usePinMarkerRequest, usePostId, useSelectedTool, useUser } from "../states";
 import React from "react";
 import { mapIcons } from "../mapIcons";
 import { useMapRefreshCount } from "../states";
@@ -16,6 +16,7 @@ export function NewPinModal(): ReactElement {
     const { user } = useUser();
     const { refreshCount, setRefreshCount } = useMapRefreshCount();
     const { setLoginData } = useLoginData();
+    const { setOpenTopic } = useOpenTopic();
 
 
     const handleClose = () => {
@@ -89,6 +90,7 @@ export function NewPinModal(): ReactElement {
         setPostId(responseData.topic_id.toString());
         // Change tool to mouse
         setSelectedTool('Mouse');
+        setOpenTopic(true)
         handleClose();
     };
 

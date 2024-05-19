@@ -7,7 +7,7 @@ import { Icon, Style } from 'ol/style';
 import { mapIcons } from '../mapIcons';
 import { toLonLat } from 'ol/proj';
 import GeoJSON from "ol/format/GeoJSON";
-import { useLoginData, usePinMarkerRequest, usePostId, useSelectedTool, useShowLoginModal } from '../states';
+import { useLoginData, useOpenTopic, usePinMarkerRequest, usePostId, useSelectedTool, useShowLoginModal } from '../states';
 import ToolbarComponent from './Tooolbar';
 import { MapBrowserEvent } from 'ol';
 import { NewPinModal } from './NewPinModal';
@@ -48,6 +48,7 @@ export function Map(): ReactElement {
     const [overlayLonLat, setOverlayLonLat] = React.useState<[number, number]>([0, 0]);
     const { loginData } = useLoginData()
     const { setShowLoginModal } = useShowLoginModal()
+    const { setOpenTopic } = useOpenTopic();
 
     useEffect(() => {
 
@@ -71,6 +72,7 @@ export function Map(): ReactElement {
 
         const postId = feature.get('postId');
         setPostId(postId);
+        setOpenTopic(true);
     }
 
     const handlePinMarkerRequest = (e: MapBrowserEvent<UIEvent>) => {
