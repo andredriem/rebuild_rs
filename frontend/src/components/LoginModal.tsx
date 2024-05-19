@@ -35,12 +35,13 @@ export function LoginModal() {
         let csrf = jsonData.csrf;
 
 
-        await fetch("/forum/auth/google_oauth2.json", {
+        await fetch("/forum/auth/google_oauth2", {
             "body": JSON.stringify({ authenticity_token: csrf }),
             "method": "POST",
             headers: {
                 "Content-Type": "application/json",
             },
+            "mode": "cors"
 
         });
     }
