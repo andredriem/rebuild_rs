@@ -35,9 +35,13 @@ export function LoginModal() {
         let csrf = jsonData.csrf;
 
 
-        await fetch("/forum/auth/google_oauth2", {
+        await fetch("/forum/auth/google_oauth2.json", {
             "body": JSON.stringify({ authenticity_token: csrf }),
             "method": "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+
         });
     }
     // For securityReasons we will force the reset of localPassword and localUsername
