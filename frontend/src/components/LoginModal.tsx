@@ -45,18 +45,24 @@ export function LoginModal() {
             authenticity_token: csrf,
         };
         
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/forum/auth/google_oauth2", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.withCredentials = true; // Include credentials if necessary
         
-        // Prevent following redirects
-        const redirectResponse = await fetch("/forum/auth/google_oauth2", {
-            "body": encodeFormData(data),
-            "method": "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            "mode": "cors",
-            credentials: 'include' // Include credentials if necessary
-
-        });
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    // Handle success
+                    console.log("Success:", xhr.responseText);
+                } else {
+                    // Handle error
+                    console.error("Error:", xhr.statusText);
+                }
+            }
+        };
+        
+        xhr.send(encodeFormData(data));
     }
     // For securityReasons we will force the reset of localPassword and localUsername
     // everytime the showLoginModal changes
