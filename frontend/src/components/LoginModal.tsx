@@ -54,6 +54,7 @@ export function LoginModal() {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             "mode": "cors",
+            credentials: 'include' // Include credentials if necessary
 
         });
     }
