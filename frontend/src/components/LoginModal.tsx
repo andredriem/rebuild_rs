@@ -17,7 +17,7 @@ export function LoginModal() {
     const [localUsername, setLocalUsername] = useState<string>('');
     const { setTriggerLoginCheckCounter, triggerLoginCheckCounter } = useTriggerLoginCheckCounter();
     const googleLogin = async () => {
-        const response = await fetch("forum/session/csrf.json", {
+        const response = await fetch("/forum/session/csrf.json", {
             headers: {
                 "Content-Type": "application/json",
             },
@@ -35,8 +35,7 @@ export function LoginModal() {
         let csrf = jsonData.csrf;
 
 
-        await fetch("https://reconstroirs.com/forum/auth/google_oauth2", {
-            "referrer": "https://reconstroirs.com/forum/latest",
+        await fetch("/forum/auth/google_oauth2", {
             "body": JSON.stringify({ authenticity_token: csrf }),
             "method": "POST",
         });
