@@ -17,7 +17,12 @@ export function LoginModal() {
     const [localUsername, setLocalUsername] = useState<string>('');
     const { setTriggerLoginCheckCounter, triggerLoginCheckCounter } = useTriggerLoginCheckCounter();
     const googleLogin = async () => {
-        const response = await fetch("forum/session/csrf.json");
+        const response = await fetch("forum/session/csrf.json", {
+            headers: {
+                "Content-Type": "application/json",
+            },
+
+        })
 
         let jsonData = null;
         try {
