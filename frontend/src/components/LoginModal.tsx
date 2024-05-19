@@ -53,14 +53,7 @@ export function LoginModal() {
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
-            "mode": "cors",
-            "redirect": "manual",
-
         });
-        console.log(redirectResponse);
-        const redirectUrl = redirectResponse.headers.get('Location');
-        //log the redirect url
-        console.log(redirectUrl);
     }
     // For securityReasons we will force the reset of localPassword and localUsername
     // everytime the showLoginModal changes
