@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useLoginData, useShowLoginModal, useTriggerLoginCheckCounter } from '../states';
-import { Modal, Button, Form } from 'react-bootstrap';
+import { Modal, Button, Form, Container, Row, Col } from 'react-bootstrap';
 import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 import { set } from 'ol/transform';
+import googleIcon from '../svg/google.svg';
 
 type LoginModalProps = {
     show: boolean;
@@ -22,7 +23,7 @@ export function LoginModal() {
                 "Content-Type": "application/json",
             },
         });
-    
+
         let jsonData = null;
         try {
             jsonData = await response.json();
@@ -30,24 +31,24 @@ export function LoginModal() {
             console.log('Failed to parse response');
             return;
         }
-    
+
         let csrf = jsonData.csrf;
-    
+
         // Create and submit the form
         const form = document.createElement("form");
         form.setAttribute("style", "display:none;");
         form.setAttribute("method", "post");
         form.setAttribute("action", "/forum/auth/google_oauth2");
-    
+
         const input = document.createElement("input");
         input.setAttribute("name", "authenticity_token");
         input.setAttribute("value", csrf);
         form.appendChild(input);
-    
+
         document.body.appendChild(form);
         form.submit();
     };
-    
+
     // For securityReasons we will force the reset of localPassword and localUsername
     // everytime the showLoginModal changes
     useEffect(() => {
@@ -128,28 +129,42 @@ export function LoginModal() {
                     <Modal.Title>Login</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Button onClick={googleLogin} variant="primary">
-                        Logar com a Google
-                    </Button>
-                    <Form.Group>
-                        <Form.Label>Username</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter username"
-                            onChange={(e) => setLocalUsername(e.target.value)}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control
-                            type="password"
-                            placeholder="Password"
-                            onChange={(e) => setLocalPassword(e.target.value)}
-                        />
-                    </Form.Group>
-                    {loginError && <div className="alert alert-danger" role="alert">
-                        {loginError}
-                    </div>}
+                    <Container>
+                        <Row className='m-2 mb-4'>
+                            <Button onClick={googleLogin} variant="light" className='border border-dark'>
+                                <Row>
+                                    <Col xs="auto">
+                                        <img src={googleIcon} alt="Google Icon" className="google-icon" style={{ height: '20px', marginRight: '8px' }} />
+                                    </Col>
+                                    <Col>
+                                        Logar com a Google
+                                    </Col>
+                                </Row>
+                            </Button>
+                        </Row>
+                        <Row>
+
+                            <Form.Group>
+                                <Form.Label>Username</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter username"
+                                    onChange={(e) => setLocalUsername(e.target.value)}
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Password</Form.Label>
+                                <Form.Control
+                                    type="password"
+                                    placeholder="Password"
+                                    onChange={(e) => setLocalPassword(e.target.value)}
+                                />
+                            </Form.Group>
+                            {loginError && <div className="alert alert-danger" role="alert">
+                                {loginError}
+                            </div>}
+                        </Row>
+                    </Container>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={closeModal}>
