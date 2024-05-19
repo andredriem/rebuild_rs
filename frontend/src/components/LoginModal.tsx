@@ -21,7 +21,8 @@ export function LoginModal() {
             headers: {
                 "Content-Type": "application/json",
             },
-        });
+
+        })
 
         let jsonData = null;
         try {
@@ -33,26 +34,22 @@ export function LoginModal() {
 
         let csrf = jsonData.csrf;
 
-        // Use XMLHttpRequest for the second request
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/forum/auth/google_oauth2", true);
-        xhr.withCredentials = true;
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.setRequestHeader("Referer", "https://reconstroirs.com/forum/latest");
+        // Prevent following redirects
+        const redirectResponse = await fetch("/forum/auth/google_oauth2", {
+            "body": JSON.stringify({ authenticity_token: csrf }),
+            "method": "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            "mode": "cors",
+            "redirect": "manual",
 
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200 || xhr.status === 302) {
-                    console.log(xhr.responseText);
-                } else {
-                    console.error('Error:', xhr.statusText);
-                }
-            }
-        };
+        });
 
-        xhr.send(JSON.stringify({ authenticity_token: csrf }));
-    };
-
+        const redirectUrl = redirectResponse.headers.get('Location');
+        //log the redirect url
+        console.log(redirectUrl);
+    }
     // For securityReasons we will force the reset of localPassword and localUsername
     // everytime the showLoginModal changes
     useEffect(() => {
