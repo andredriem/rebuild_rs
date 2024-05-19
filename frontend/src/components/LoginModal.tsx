@@ -21,9 +21,8 @@ export function LoginModal() {
             headers: {
                 "Content-Type": "application/json",
             },
-
-        })
-
+        });
+    
         let jsonData = null;
         try {
             jsonData = await response.json();
@@ -31,39 +30,24 @@ export function LoginModal() {
             console.log('Failed to parse response');
             return;
         }
-
+    
         let csrf = jsonData.csrf;
-
-        // Prepare the content of the request
-        function encodeFormData(data: any) {
-            return Object.keys(data)
-                .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-                .join('&');
-        }
-        
-        const data = {
-            authenticity_token: csrf,
-        };
-        
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/forum/auth/google_oauth2", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.withCredentials = true; // Include credentials if necessary
-        
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    // Handle success
-                    console.log("Success:", xhr.responseText);
-                } else {
-                    // Handle error
-                    console.error("Error:", xhr.statusText);
-                }
-            }
-        };
-        
-        xhr.send(encodeFormData(data));
-    }
+    
+        // Create and submit the form
+        const form = document.createElement("form");
+        form.setAttribute("style", "display:none;");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", "/forum/auth/google_oauth2");
+    
+        const input = document.createElement("input");
+        input.setAttribute("name", "authenticity_token");
+        input.setAttribute("value", csrf);
+        form.appendChild(input);
+    
+        document.body.appendChild(form);
+        form.submit();
+    };
+    
     // For securityReasons we will force the reset of localPassword and localUsername
     // everytime the showLoginModal changes
     useEffect(() => {
