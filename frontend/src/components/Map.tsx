@@ -16,20 +16,28 @@ import { useMapRefreshCount } from '../states';
 import { getDistance } from 'ol/sphere';
 import { Point } from 'ol/geom';
 
+const DEFAULT_LATITUDE = -30.74395884549905;
+const DEFAULT_LONGITUDE = -50.53246175309501;
+const DEFAULT_ZOOM = 12;
+
 /** Main map */
 export function Map(): ReactElement {
     // get latitude and longitude from the querystring
-    let queryLatitude = parseFloat(new URLSearchParams(window.location.search).get('latitude') ?? '-30.74395884549905');
-    let queryLongitude = parseFloat(new URLSearchParams(window.location.search).get('longitude') ?? '-50.53246175309501');
+    let queryLatitude = parseFloat(new URLSearchParams(window.location.search).get('latitude') ?? DEFAULT_LATITUDE.toString())
+    let queryLongitude = parseFloat(new URLSearchParams(window.location.search).get('longitude') ?? DEFAULT_LONGITUDE.toString())
+    let queryZoom = parseFloat(new URLSearchParams(window.location.search).get('zoom') ?? DEFAULT_ZOOM.toString())
     if (isNaN(queryLatitude) || isNaN(queryLongitude)) {
-        queryLatitude = -30.74395884549905;
-        queryLongitude = -50.53246175309501;
+        queryLatitude = DEFAULT_LATITUDE;
+        queryLongitude = DEFAULT_LONGITUDE;
+    }
+    if (isNaN(queryZoom)) {
+        queryZoom = DEFAULT_ZOOM;
     }
 
     const [latitude, setLatitude] = React.useState(queryLatitude);
     const { setPostId, postId } = usePostId();
     const [longitude, setLongitude] = React.useState(queryLongitude);
-    const [zoom] = React.useState(14);
+    const [zoom, setZoom] = React.useState(DEFAULT_ZOOM);
     const popup = React.useRef<RPopup>()
     const vectorLayerRef = React.useRef<RLayerVector>();
     const { selectedTool } = useSelectedTool();
@@ -126,7 +134,7 @@ export function Map(): ReactElement {
                     }
 
                     // Set latitude and longitude in the querystring without reloading the page
-                    window.history.pushState({}, '', `?latitude=${newCoordinates[1]}&longitude=${newCoordinates[0]}&post_id=${postId}`);
+                    window.history.pushState({}, '', `?latitude=${newCoordinates[1]}&longitude=${newCoordinates[0]}&post_id=${postId}&zoom=${zoom}`);
 
                 }}
             >
