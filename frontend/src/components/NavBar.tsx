@@ -6,7 +6,7 @@ import { LoginLoggoutButton } from './LoginLogoutButton';
 function NavBar() {
   return (
     <Navbar bg="light" expand="lg" style={{ zIndex: 1001 }}>
-      <Navbar.Brand href="/" style={{ marginLeft: '20px' }}>
+      <Navbar.Brand href="/" style={{ marginLeft: '20px', display: 'flex', alignItems: 'center' }}>
         <img
           src={process.env.PUBLIC_URL + "/logo192.png"}
           width="30"
@@ -14,6 +14,7 @@ function NavBar() {
           className="d-inline-block align-top"
           alt="Logo"
         />
+        <span className='font-weight-bold'  style={{ marginLeft: '10px' }}>Reconstrói RS</span>
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
