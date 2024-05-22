@@ -83,7 +83,7 @@ function App() {
       try {
         data = await response.json();
       } catch (error) {
-        setAppLoadingError('Failed to get Session data from backend');
+        setLoginCheck(true);
         return;
       }
       if (response.ok) {
