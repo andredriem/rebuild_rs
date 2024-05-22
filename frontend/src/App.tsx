@@ -103,9 +103,9 @@ function App() {
       <div style={{ height: '6vh', zIndex: 9999999999 }}>
         <NavBar />
       </div>
-      <div style={{ height: '94vh' }}>
+      <div style={{ height: '94vh', marginLeft:0, marginRight:0 }}>
 
-        <Container fluid={true} >
+        <Container fluid={true} className="px-0">
           <LoginModal />
           <div style={topicStyle}>
             <Topic />

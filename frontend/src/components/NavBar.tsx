@@ -8,7 +8,7 @@ function NavBar() {
     <Navbar bg="light" expand="lg" style={{ zIndex: 1001 }}>
       <Navbar.Brand href="/" style={{ marginLeft: '20px' }}>
         <img
-          src="/logo192.png"
+          src={process.env.PUBLIC_URL + "/logo192.png"}
           width="30"
           height="30"
           className="d-inline-block align-top"
