@@ -16,9 +16,9 @@ import { useMapRefreshCount } from '../states';
 import { getDistance } from 'ol/sphere';
 import { Point } from 'ol/geom';
 
-const DEFAULT_LATITUDE = -30.707657941645316;
-const DEFAULT_LONGITUDE = -50.7949242640363;
-const DEFAULT_ZOOM = 10;
+const DEFAULT_LATITUDE = -30.504617197513113;
+const DEFAULT_LONGITUDE = -52.185234910459485;
+const DEFAULT_ZOOM = 15;
 
 function buildRlayerUrl(latitude: number, longitude: number, zoom: number, refreshCount: number) {
     return `/forum/topics/maps_data.json?latitude=${latitude}&longitude=${longitude}&zoom=${zoom}&refreshCount=${refreshCount}`
