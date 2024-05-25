@@ -16,6 +16,7 @@
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
     "bootstrap": "^5.3.3",
+    "build": "^0.1.4",
     "i": "^0.3.7",
     "lorem-ipsum": "^2.0.8",
     "npm": "^10.7.0",
