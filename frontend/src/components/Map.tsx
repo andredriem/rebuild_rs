@@ -1,20 +1,33 @@
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement, useCallback, useEffect } from 'react';
 import { fromLonLat } from 'ol/proj';
 import 'ol/ol.css';
 
-import { RMap, ROSM, RLayerVector, RPopup, RFeature, RFeatureUIEvent, RStyle, ROverlay } from 'rlayers';
+import { RMap, ROSM, RLayerVector, RPopup, RFeature, RFeatureUIEvent, ROverlay, RLayerCluster, RControl, RLayerTile } from 'rlayers';
+import {
+    RStyle,
+    RFill,
+    RStroke,
+    RRegularShape,
+    RCircle,
+    RText,
+    RIcon,
+} from "rlayers/style";
 import { Icon, Style } from 'ol/style';
 import { mapIcons } from '../mapIcons';
 import { toLonLat } from 'ol/proj';
 import GeoJSON from "ol/format/GeoJSON";
 import { useLoginData, useOpenTopic, usePinMarkerRequest, usePostId, useSelectedTool, useShowLoginModal } from '../states';
 import ToolbarComponent from './Tooolbar';
-import { MapBrowserEvent } from 'ol';
+import { Feature, MapBrowserEvent } from 'ol';
 import { NewPinModal } from './NewPinModal';
 import { v4 as uuidv4 } from 'uuid';
 import { useMapRefreshCount } from '../states';
 import { getDistance } from 'ol/sphere';
-import { Point } from 'ol/geom';
+import { Geometry, Point } from 'ol/geom';
+import { createEmpty, extend, getHeight, getWidth } from 'ol/extent';
+import "ol/ol.css";
+import "rlayers/control/layers.css";
+
 
 const DEFAULT_LATITUDE = -30.343501569973775;
 const DEFAULT_LONGITUDE = -52.745430653510944;
@@ -23,6 +36,22 @@ const DEFAULT_ZOOM = 7;
 function buildRlayerUrl(latitude: number, longitude: number, zoom: number, refreshCount: number) {
     return `/forum/topics/maps_data.json?latitude=${latitude}&longitude=${longitude}&zoom=${zoom}&refreshCount=${refreshCount}`
 }
+
+const colorBlob = (size: number) => {
+    // alpha is min 100 and max 255
+    // it gets att 255 when size is 10 or more
+    let alpha = Math.min(255, 100 + (size * 15) - 15);
+
+    return "rgba(" +
+        [255, 153, 0, alpha / 255].join() +
+        ")";
+}
+
+const radiusStar = (feature: Feature<Geometry>) => {
+    return feature.get('icon')
+}
+
+
 
 /** Main map */
 export function Map(): ReactElement {
@@ -43,7 +72,7 @@ export function Map(): ReactElement {
     const [longitude, setLongitude] = React.useState(queryLongitude);
     const [zoom, setZoom] = React.useState(DEFAULT_ZOOM);
     const popup = React.useRef<RPopup>()
-    const vectorLayerRef = React.useRef<RLayerVector>();
+    const vectorLayerRef = React.useRef<RLayerCluster>();
     const { selectedTool } = useSelectedTool();
     const { pinMarkerRequest, setPinMarkerRequest } = usePinMarkerRequest();
     const { refreshCount, setRefreshCount } = useMapRefreshCount();
@@ -55,6 +84,94 @@ export function Map(): ReactElement {
     const { setOpenTopic } = useOpenTopic();
     const [lastRefresh, setLastRefresh] = React.useState(Date.now());
     const [rlayerUrl, setRlayerUrl] = React.useState(buildRlayerUrl(latitude, longitude, zoom, refreshCount));
+    const [featureLoadedCount, setFeatureLoadedCount] = React.useState(0);
+
+    const clusterCacheFunction = (feature: Feature<Geometry>, resolution: number) => {
+        // This is the hashing function, it takes a feature as its input
+        // and returns a string
+        // It must be dependant of the same inputs as the rendering function
+        return feature.get("features").length > 1
+            ? "#" + extentFeatures(feature.get("features"), resolution)
+            : "$" + radiusStar(feature.get("features")[0])
+    }
+
+    // This returns the north/south east/west extent of a group of features
+    // divided by the resolution
+    const extentFeatures = (features: Feature<Geometry>[], resolution: number) => {
+        const extent = createEmpty();
+        for (const f of features) {
+            const geometry = f.getGeometry();
+            if (geometry === undefined) continue;
+            extend(extent, geometry.getExtent());
+        }
+        return Math.round(0.25 * (getWidth(extent) + getHeight(extent))) / resolution;
+    };
+
+    const renderCache = (feature: Feature<Geometry>, resolution: number) => {
+        // This is the rendering function
+        // It has access to the cluster which appears as a single feature
+        // and has a property with an array of all the features that make it
+        const size = feature.get("features").length;
+        console.log(size);
+        console.log(feature.get("features"));
+        // This is the size (number of features) of the cluster
+        if (size > 1 && zoom < 15) {
+            // Render a blob with a number
+            const radius = extentFeatures(
+                feature.get("features"),
+                resolution
+            );
+
+            return (
+                // A dynamic style should return a fragment instead of a
+                // full-blown RStyle - returning a full RStyle here
+                // will simply replace the style used by the vector layer
+                // with a fixed one
+                <React.Fragment>
+                    <RCircle radius={32}>
+                        <RFill color={colorBlob(size)} />
+                    </RCircle>
+                    <RText scale={2} text={size.toString()}>
+                        <RFill color="#fff" />
+                        <RStroke color="rgba(0, 0, 0, 0.6)" width={3} />
+                    </RText>
+                </React.Fragment>
+            );
+        }
+        // We have a single feature cluster
+        const icons = []
+        function getRandomKey(obj: Record<string, any>): string {
+            const keys = Object.keys(obj);
+            return keys[Math.floor(Math.random() * keys.length)];
+        }
+
+        for (const unclusteredFeature of feature.get("features")) {
+
+
+            const icon = mapIcons[unclusteredFeature.get('icon')];
+            const randomIcon = mapIcons[getRandomKey(mapIcons)];
+            icons.push(<RIcon src={icon ?? randomIcon} />)
+        }
+
+        return <>
+            {icons}
+        </>
+
+        /*
+        // Render a star
+        return (
+            <RRegularShape
+                radius={radiusStar(unclusteredFeature)}
+                radius2={3}
+                points={5}
+                angle={Math.PI}
+            >
+                <RFill color="rgba(255, 153, 0, 0.8)" />
+                <RStroke color="rgba(255, 204, 0, 0.2)" width={1} />
+            </RRegularShape>
+        ); */
+    };
+
 
     useEffect(() => {
 
@@ -75,10 +192,12 @@ export function Map(): ReactElement {
 
 
     const handleFeatureClick = (e: RFeatureUIEvent) => {
-        const feature = e.target;
-        const geometry = feature?.getGeometry();
-        if (feature === undefined) return;
+        const features = e.target.get("features") ?? [];
+        const geometry = e.target?.getGeometry();
+
+        if (features.length === 0) return;
         if (geometry === undefined) return;
+
         //const coordinates = e.map.getCoordinateFromPixel(e.pixel);
 
         e.map.getView().fit(geometry.getExtent(), {
@@ -86,7 +205,12 @@ export function Map(): ReactElement {
             maxZoom: 15,
         });
 
-        const postId = feature.get('postId');
+        // If we are targetting a single feature, open the topic
+        if (features.length > 1) {
+            return;
+        }
+
+        const postId = features[0].get('postId');
         setPostId(postId);
         setOpenTopic(true);
     }
@@ -108,6 +232,8 @@ export function Map(): ReactElement {
         });
     }
 
+    const layersButton = <button>&#9776;</button>;
+
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
             <NewPinModal />
@@ -121,7 +247,7 @@ export function Map(): ReactElement {
                     backgroundColor: 'white',
                     padding: '10px',
                     boxShadow: '0 1px 5px rgba(0,0,0,0.65)'
-                  }
+                }
             } />
             <RMap
                 className='example-map'
@@ -156,52 +282,69 @@ export function Map(): ReactElement {
 
                 }}
             >
-                <ROSM />
-
-                <RLayerVector
+                <RControl.RLayers element={layersButton}>
+                    <ROSM properties={{ label: "Padrão" }} />
+                    <RLayerTile
+                        properties={{ label: "Topologia" }}
+                        url="https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                        attributions="Kartendaten: © OpenStreetMap-Mitwirkende, SRTM | Kartendarstellung: © OpenTopoMap (CC-BY-SA)"
+                    />
+                </RControl.RLayers>
+                <RLayerCluster
+                    ref={vectorLayerRef as any}
                     url={rlayerUrl}
                     format={new GeoJSON({ featureProjection: "EPSG:3857" })}
-                    style={(feature) => {
-                        const icon = mapIcons[feature.get('icon')];
-                        function getRandomKey(obj: Record<string, any>): string {
-                            const keys = Object.keys(obj);
-                            return keys[Math.floor(Math.random() * keys.length)];
-                        }
-                        const randomIcon = mapIcons[getRandomKey(mapIcons)];
-                        return new Style({
-                            image: new Icon({
-                                src: icon ?? randomIcon,
-                                anchor: [0.5, 0.8],
-                            }),
-                        });
-                    }}
                     onClick={(e) => {
                         if (e.target !== undefined && selectedTool === 'Mouse') {
                             handleFeatureClick(e);
                         }
                     }}
+                    onFeaturesLoadStart={(e) => { setFeatureLoadedCount(featureLoadedCount + 1) }}
                     onPointerMove={(e) => {
                         const feature = e.map.forEachFeatureAtPixel(e.pixel, (feature) => feature);
-                        if (feature) {
-                            setPopupContent(feature.get('title'));
-                            const lonLat = toLonLat(e.coordinate);
-                            setOverlayLonLat([lonLat[0], lonLat[1]]);
+                        if (feature === undefined) { setPopupContent(null); return; }
+                        const lonlat = toLonLat(e.coordinate);
+                        const featureCluster = feature.get('features');
+                        if (featureCluster === undefined) { setPopupContent(null); return; }
+                        if (featureCluster.length > 1) {
+                            setPopupContent(`Clique aqui para ver os tópicos agrupados`);
+                            setOverlayLonLat([lonlat[0], lonlat[1]]);
+                        } else if (featureCluster.length === 1) {
+                            const singleFeature = featureCluster[0];
+                            setPopupContent(singleFeature.get('title'));
+                            setOverlayLonLat([lonlat[0], lonlat[1]]);
                         } else {
                             setPopupContent(null);
                         }
                     }}
+                    onPointerLeave={(e) => {
+                        setPopupContent(null);
+                    }}
 
                 >
-                    <RFeature
-                        geometry={new Point(fromLonLat(overlayLonLat))}
+                    <RStyle
+                        cacheId={clusterCacheFunction}
+                        render={renderCache}
                     >
                         {popupContent && (
                             <ROverlay className="example-overlay">
                                 {popupContent}
                             </ROverlay>)
                         }
-                    </RFeature>
-                </RLayerVector>
+                    </RStyle>
+                    <RStyle>
+
+                        <RFeature
+                            geometry={new Point(fromLonLat(overlayLonLat))}
+                        >
+                            {popupContent && (
+                                <ROverlay className="example-overlay">
+                                    {popupContent}
+                                </ROverlay>)
+                            }
+                        </RFeature>
+                    </RStyle>
+                </RLayerCluster>
             </RMap>
         </div>
     );

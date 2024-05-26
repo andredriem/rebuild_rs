@@ -63,6 +63,16 @@ export function NewPinModal(): ReactElement {
             return;
         }
 
+        if(responseData.errors !== undefined && responseData.errors.length !== 0) {
+            setError(responseData.errors.join('\n') || 'An unknown error occurred.');
+            return;
+        }
+
+        if(responseData.error !== undefined && responseData.error.length !== 0) {
+            setError(responseData.error.join('\n') || 'An unknown error occurred.');
+            return;
+        }
+
         if (response.status === 422) {
             try {
                 setError(responseData.errors.join('\n') || 'An unknown error occurred.');

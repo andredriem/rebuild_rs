@@ -5,6 +5,7 @@ import factorySvg from './svg/factory-svgrepo-com.svg';
 import tunnelSvg from './svg/tunnel-svgrepo-com.svg';
 import channelSvg from './svg/channel-svgrepo-com.svg';
 import questionSvg from './svg/question-and-answer-svgrepo-com.svg';
+import treesIconSvg from './svg/trees-tree-svgrepo-com.svg';
 
 
 export const mapIcons: Record<string, string> = {
@@ -15,4 +16,5 @@ export const mapIcons: Record<string, string> = {
     tunnelSvg,
     channelSvg,
     questionSvg,
+    treesIconSvg,
 };

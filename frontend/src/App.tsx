@@ -131,7 +131,7 @@ function App() {
       <>
         <NavBar />
 
-        <Container fluid={true} style={{ marginLeft: 20, padding: 0 }}>
+        <Container fluid={true} style={{ marginLeft: 0, padding: 0 }}>
           <LoginModal />
           <Row>
             <Col xs={5}>
