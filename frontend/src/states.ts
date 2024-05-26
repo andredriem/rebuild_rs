@@ -20,6 +20,30 @@ export const useLoginData = create<LoginDataState>((set) => ({
     setLoginData: (loginData) => set({ loginData }),
 }));
 
+type ShowLayerModalState = {
+    showLayerModal: boolean;
+    setShowLayerModal: (showLayerModal: boolean) => void;
+};
+
+export const useShowLayerModal = create<ShowLayerModalState>((set) => ({
+    showLayerModal: false,
+    setShowLayerModal: (showLayerModal) => set({ showLayerModal }),
+}));
+
+export type LayerType = 'default' | 'topo' | 'satellite';
+
+type CurrentLayerState = {
+    currentLayer: LayerType;
+    setCurrentLayer: (currentLayer: LayerType) => void;
+};
+
+export const useCurrentLayer = create<CurrentLayerState>((set) => ({
+    currentLayer: 'default',
+    setCurrentLayer: (currentLayer: LayerType) => set({ currentLayer }),
+}));
+
+
+
 type ShowLoginModalState = {
     showLoginModal: boolean;
     setShowLoginModal: (showLoginModal: boolean) => void;
@@ -45,7 +69,7 @@ export const usePostId = create<PostIdsState>((set) => ({
     setPostId: (postId) => set({ postId }),
 }));
 
-export type SelectedTool = 'Mouse' | 'Pin'
+export type SelectedTool = 'Mouse' | 'Pin' | 'ChangePin'
 
 type SelectedToolState = {
     selectedTool: SelectedTool;
@@ -56,6 +80,27 @@ export const useSelectedTool = create<SelectedToolState>((set) => ({
     selectedTool: 'Mouse',
     setSelectedTool: (selectedTool) => set({ selectedTool }),
 }));
+
+export type ChangePinSelectedTopicIdState = {
+    changePinSelectedTopicId: string | null;
+    setChangePinSelectedTopicId: (topicId: string | null) => void;
+};
+
+export const useChangePinSelectedTopicId = create<ChangePinSelectedTopicIdState>((set) => ({
+    changePinSelectedTopicId: null,
+    setChangePinSelectedTopicId: (topicId) => set({ changePinSelectedTopicId: topicId }),
+}));
+
+export type changeGenereicErrorState = {
+    changeGenericError: string | null;
+    setChangeGenericError: (error: string | null) => void;
+};
+
+export const useChangeGenericError = create<changeGenereicErrorState>((set) => ({
+    changeGenericError: null,
+    setChangeGenericError: (error) => set({ changeGenericError: error }),
+}));
+    
 
 export type PinMarkerRequest = {
     latitude: number,

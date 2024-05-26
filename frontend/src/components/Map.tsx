@@ -16,7 +16,7 @@ import { Icon, Style } from 'ol/style';
 import { mapIcons } from '../mapIcons';
 import { toLonLat } from 'ol/proj';
 import GeoJSON from "ol/format/GeoJSON";
-import { useLoginData, useOpenTopic, usePinMarkerRequest, usePostId, useSelectedTool, useShowLoginModal } from '../states';
+import { useChangeGenericError, useChangePinSelectedTopicId, useCurrentLayer, useLoginData, useOpenTopic, usePinMarkerRequest, usePostId, useSelectedTool, useShowLoginModal } from '../states';
 import ToolbarComponent from './Tooolbar';
 import { Feature, MapBrowserEvent } from 'ol';
 import { NewPinModal } from './NewPinModal';
@@ -27,6 +27,7 @@ import { Geometry, Point } from 'ol/geom';
 import { createEmpty, extend, getHeight, getWidth } from 'ol/extent';
 import "ol/ol.css";
 import "rlayers/control/layers.css";
+import LayerModal from './LayerModal';
 
 
 const DEFAULT_LATITUDE = -30.343501569973775;
@@ -73,9 +74,11 @@ export function Map(): ReactElement {
     const [zoom, setZoom] = React.useState(DEFAULT_ZOOM);
     const popup = React.useRef<RPopup>()
     const vectorLayerRef = React.useRef<RLayerCluster>();
-    const { selectedTool } = useSelectedTool();
+    const { selectedTool, setSelectedTool } = useSelectedTool();
     const { pinMarkerRequest, setPinMarkerRequest } = usePinMarkerRequest();
     const { refreshCount, setRefreshCount } = useMapRefreshCount();
+    // Make ref to store first refreshcount
+    const oldRefreshCount = React.useRef(refreshCount);
     const [refreshTimoutCalled, setRefreshTimoutCalled] = React.useState(false);
     const [popupContent, setPopupContent] = React.useState<string | null>('');
     const [overlayLonLat, setOverlayLonLat] = React.useState<[number, number]>([0, 0]);
@@ -85,6 +88,11 @@ export function Map(): ReactElement {
     const [lastRefresh, setLastRefresh] = React.useState(Date.now());
     const [rlayerUrl, setRlayerUrl] = React.useState(buildRlayerUrl(latitude, longitude, zoom, refreshCount));
     const [featureLoadedCount, setFeatureLoadedCount] = React.useState(0);
+    const { currentLayer } = useCurrentLayer();
+    const { changePinSelectedTopicId, setChangePinSelectedTopicId } = useChangePinSelectedTopicId();
+    const { setChangeGenericError, changeGenericError } = useChangeGenericError();
+
+
 
     const clusterCacheFunction = (feature: Feature<Geometry>, resolution: number) => {
         // This is the hashing function, it takes a feature as its input
@@ -177,13 +185,23 @@ export function Map(): ReactElement {
 
     }, [postId, refreshCount]);
 
+    // Use effect to restore generic error in case of tool change
+    useEffect(() => {
+        setChangeGenericError(null);
+    }, [selectedTool, setChangeGenericError]);
+
     useEffect(() => {
         // Only refresh if lastRefresh was 30 seconds ago
-        const now = Date.now();
-        if (now - lastRefresh > 30000) {
+        const now = Date.now()
+        const timeCondition = now - lastRefresh > 30000;
+        const refreshCountCondition = oldRefreshCount.current !== refreshCount;
+
+        if (timeCondition || refreshCountCondition) {
             setLastRefresh(now);
             setRlayerUrl(buildRlayerUrl(latitude, longitude, zoom, refreshCount));
             setLastRefresh(now);
+            // Update ref
+            oldRefreshCount.current = refreshCount
         }
     }, [refreshCount, latitude, longitude, zoom, lastRefresh]);
 
@@ -215,6 +233,56 @@ export function Map(): ReactElement {
         setOpenTopic(true);
     }
 
+    const handleSetChangePinSelectedTopicId = (e: RFeatureUIEvent) => {
+        const features = e.target.get("features") ?? [];
+        if (features.length === 0) return;
+        if (features.length > 1) return;
+
+        const postId = features[0].get('postId');
+        setChangePinSelectedTopicId(postId.toString());
+    }
+
+    const handleNewPinLocationSelected = async (e: MapBrowserEvent<UIEvent>) => {
+        const coordinates = toLonLat(
+            e.map.getCoordinateFromPixel(e.pixel)
+        )
+        if (changePinSelectedTopicId === null) return;
+
+
+        // Post new latitute and longitude to the backend
+        const response = await fetch(`/forum/topics/${changePinSelectedTopicId}/update_lonlat.json`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                latitude: coordinates[1],
+                longitude: coordinates[0]
+            })
+        });
+        let responseJson;
+        try{
+            responseJson = await response.json();
+        } catch (error) {
+            setChangeGenericError('Failed to parse response');
+            setChangePinSelectedTopicId(null);
+            return;
+        }
+
+        if (!response.ok) {
+            setChangeGenericError('Falha ao mover tópico, você tem certeza que criout este tópico?');
+            setChangePinSelectedTopicId(null);
+            return
+        }
+
+        setChangePinSelectedTopicId(null);
+        setRefreshCount(refreshCount + 1);
+        // Change too back to mouse
+        setSelectedTool('Mouse');
+        
+
+    }
+
     const handlePinMarkerRequest = (e: MapBrowserEvent<UIEvent>) => {
         // Check if the user is logged in
         if (loginData === null) {
@@ -237,6 +305,7 @@ export function Map(): ReactElement {
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
             <NewPinModal />
+            <LayerModal />
             <ToolbarComponent style={
                 {
                     position: 'absolute',
@@ -255,6 +324,8 @@ export function Map(): ReactElement {
                 onClick={(e) => {
                     if (pinMarkerRequest === null && selectedTool === 'Pin') {
                         handlePinMarkerRequest(e);
+                    } else if (selectedTool === 'ChangePin') {
+                        handleNewPinLocationSelected(e);
                     }
                 }}
                 onMoveEnd={(e) => {
@@ -282,21 +353,37 @@ export function Map(): ReactElement {
 
                 }}
             >
-                <RControl.RLayers element={layersButton}>
-                    <ROSM properties={{ label: "Padrão" }} />
-                    <RLayerTile
-                        properties={{ label: "Topologia" }}
-                        url="https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                        attributions="Kartendaten: © OpenStreetMap-Mitwirkende, SRTM | Kartendarstellung: © OpenTopoMap (CC-BY-SA)"
-                    />
-                </RControl.RLayers>
+                {/*(() => {
+                    switch (currentLayer) {
+                        case 'default':
+                            return <ROSM />;
+                        case 'topo':
+                        default:
+                            return <RLayerTile
+                                properties={{ label: "Topologia" }}
+                                url="https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                                attributions="Kartendaten: © OpenStreetMap-Mitwirkende, SRTM | Kartendarstellung: © OpenTopoMap (CC-BY-SA)"
+                            />
+                    }
+                })()*/}
+
+                <ROSM properties={{ visible: currentLayer === 'default' }} />
+                <RLayerTile
+                    properties={{ visible: currentLayer === 'topo' }}
+                    url="https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                    attributions="Kartendaten: © OpenStreetMap-Mitwirkende, SRTM | Kartendarstellung: © OpenTopoMap (CC-BY-SA)"
+                />
                 <RLayerCluster
                     ref={vectorLayerRef as any}
                     url={rlayerUrl}
                     format={new GeoJSON({ featureProjection: "EPSG:3857" })}
                     onClick={(e) => {
-                        if (e.target !== undefined && selectedTool === 'Mouse') {
-                            handleFeatureClick(e);
+                        if (e.target !== undefined) {
+                            if (selectedTool === 'Mouse') {
+                                handleFeatureClick(e);
+                            } if (selectedTool === 'ChangePin') {
+                                handleSetChangePinSelectedTopicId(e);
+                            }
                         }
                     }}
                     onFeaturesLoadStart={(e) => { setFeatureLoadedCount(featureLoadedCount + 1) }}
