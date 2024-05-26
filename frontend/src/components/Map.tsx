@@ -120,8 +120,6 @@ export function Map(): ReactElement {
         // It has access to the cluster which appears as a single feature
         // and has a property with an array of all the features that make it
         const size = feature.get("features").length;
-        console.log(size);
-        console.log(feature.get("features"));
         // This is the size (number of features) of the cluster
         if (size > 1 && zoom < 15) {
             // Render a blob with a number
@@ -181,10 +179,6 @@ export function Map(): ReactElement {
     };
 
 
-    useEffect(() => {
-
-    }, [postId, refreshCount]);
-
     // Use effect to restore generic error in case of tool change
     useEffect(() => {
         setChangeGenericError(null);
@@ -194,6 +188,10 @@ export function Map(): ReactElement {
         // Only refresh if lastRefresh was 30 seconds ago
         const now = Date.now()
         const timeCondition = now - lastRefresh > 30000;
+        console.log('Time condition', timeCondition);
+        console.log('Refresh count condition', oldRefreshCount.current !== refreshCount);
+        console.log('Refresh count', refreshCount);
+        console.log('Old refresh count', oldRefreshCount.current);
         const refreshCountCondition = oldRefreshCount.current !== refreshCount;
 
         if (timeCondition || refreshCountCondition) {
@@ -345,7 +343,10 @@ export function Map(): ReactElement {
                     if (distance > 5000) {
                         setLatitude(newCoordinates[1]);
                         setLongitude(newCoordinates[0]);
-                        setRefreshCount(lastCount + 1);
+                        // Only set refresh count if 30s has passed
+                        if (Date.now() - lastRefresh > 30000) {
+                            setRefreshCount(lastCount + 1);
+                        }
                     }
 
                     // Set latitude and longitude in the querystring without reloading the page
